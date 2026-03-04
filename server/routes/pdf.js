@@ -194,10 +194,23 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
         // --- Auto-Email Feature ---
         let emailSent = false;
         const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
-        if (sessionCookie) {
+        const authHeader = req.headers.authorization || '';
+        let idToken = '';
+        
+        if (authHeader.startsWith('Bearer ')) {
+            idToken = authHeader.split('Bearer ')[1];
+        }
+
+        if (sessionCookie || idToken) {
             try {
                 const admin = require('firebase-admin');
-                const decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                let decodedClaims;
+                
+                if (sessionCookie) {
+                    decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                } else {
+                    decodedClaims = await admin.auth().verifyIdToken(idToken, true);
+                }
 
                 // Get the user's email either from claims or by fetching the user record
                 let userEmail = decodedClaims.email;
@@ -217,7 +230,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
                     }
                 }
             } catch (authErr) {
-                console.error('Auto-email error (verifying session cookie):', authErr);
+                console.error('Auto-email error (verifying auth):', authErr);
                 // We swallow the error so the PDF download still succeeds even if email fails
             }
         }
@@ -247,11 +260,25 @@ router.get('/download/:sessionId', async (req, res) => {
 
     // Trigger auto-email in background (don't block the download)
     const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
-    if (sessionCookie) {
+    const authHeader = req.headers.authorization || '';
+    let idToken = '';
+    
+    if (authHeader.startsWith('Bearer ')) {
+        idToken = authHeader.split('Bearer ')[1];
+    }
+
+    if (sessionCookie || idToken) {
         (async () => {
             try {
                 const admin = require('firebase-admin');
-                const decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                let decodedClaims;
+                
+                if (sessionCookie) {
+                    decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                } else {
+                    decodedClaims = await admin.auth().verifyIdToken(idToken, true);
+                }
+                
                 let userEmail = decodedClaims.email;
                 if (!userEmail && decodedClaims.uid) {
                     const userRecord = await admin.auth().getUser(decodedClaims.uid);

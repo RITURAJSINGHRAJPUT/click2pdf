@@ -575,14 +575,19 @@ function setupDownloadButton(sessionId) {
             const isSingleInstance = allInstances.length === 1;
 
             const userId = window.getCurrentUserId ? await window.getCurrentUserId() : null;
+            const token = window.getFirebaseToken ? await window.getFirebaseToken() : null;
+            const headers = {
+                'Content-Type': 'application/json',
+                'x-user-id': userId || ''
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
             // Generate PDF
             const generateRes = await fetch(`/api/generate/${sessionId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-user-id': userId || ''
-                },
+                headers: headers,
                 body: JSON.stringify({
                     fields: isSingleInstance ? allInstances[0].fields : null,
                     instances: isSingleInstance ? null : allInstances,
@@ -698,11 +703,19 @@ function setupEmailButton(sessionId) {
             const flatten = flattenCheckbox?.checked || false;
             const isSingleInstance = allInstances.length === 1;
 
+            const userId = window.getCurrentUserId ? await window.getCurrentUserId() : null;
+            const token = window.getFirebaseToken ? await window.getFirebaseToken() : null;
+            const headers = {
+                'Content-Type': 'application/json',
+                'x-user-id': userId || ''
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const generateRes = await fetch(`/api/generate/${sessionId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     fields: isSingleInstance ? allInstances[0].fields : null,
                     instances: isSingleInstance ? null : allInstances,
