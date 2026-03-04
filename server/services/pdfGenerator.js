@@ -16,8 +16,10 @@ async function generateFilledPDF(pdfPath, fields, flatten = false) {
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const pages = pdfDoc.getPages();
-
+    const timerName = `[Perf] Filling PDF: ${path.basename(pdfPath)}`;
+    console.time(timerName);
     await fillPdfPages(pdfDoc, pages, fields, helveticaFont, helveticaBold);
+    console.timeEnd(timerName);
 
     // Flatten if requested (removes form interactivity)
     if (flatten) {

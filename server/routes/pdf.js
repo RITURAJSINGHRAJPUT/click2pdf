@@ -196,7 +196,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
         const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
         const authHeader = req.headers.authorization || '';
         let idToken = '';
-        
+
         if (authHeader.startsWith('Bearer ')) {
             idToken = authHeader.split('Bearer ')[1];
         }
@@ -205,7 +205,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
             try {
                 const admin = require('firebase-admin');
                 let decodedClaims;
-                
+
                 if (sessionCookie) {
                     decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
                 } else {
@@ -220,14 +220,13 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
                 }
 
                 if (userEmail) {
+                    console.log(`[Generate] Triggering background auto-email to: ${userEmail}`);
                     const { sendPdfEmail } = require('../services/emailService');
-                    // Await the email so we can tell the frontend if it succeeded
-                    try {
-                        await sendPdfEmail(userEmail, filledPath, 'filled-form.pdf');
-                        emailSent = true;
-                    } catch (err) {
-                        console.error(`Failed to auto-email ${userEmail}:`, err);
-                    }
+                    // Send email in background to avoid blocking the response
+                    sendPdfEmail(userEmail, filledPath, 'filled-form.pdf')
+                        .then(() => console.log(`[Generate] Background email sent to ${userEmail}`))
+                        .catch(err => console.error(`[Generate] Background email failed for ${userEmail}:`, err.message));
+                    emailSent = true;
                 }
             } catch (authErr) {
                 console.error('Auto-email error (verifying auth):', authErr);
@@ -262,7 +261,7 @@ router.get('/download/:sessionId', async (req, res) => {
     const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
     const authHeader = req.headers.authorization || '';
     let idToken = '';
-    
+
     if (authHeader.startsWith('Bearer ')) {
         idToken = authHeader.split('Bearer ')[1];
     }
@@ -272,13 +271,13 @@ router.get('/download/:sessionId', async (req, res) => {
             try {
                 const admin = require('firebase-admin');
                 let decodedClaims;
-                
+
                 if (sessionCookie) {
                     decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
                 } else {
                     decodedClaims = await admin.auth().verifyIdToken(idToken, true);
                 }
-                
+
                 let userEmail = decodedClaims.email;
                 if (!userEmail && decodedClaims.uid) {
                     const userRecord = await admin.auth().getUser(decodedClaims.uid);

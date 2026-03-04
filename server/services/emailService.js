@@ -37,10 +37,12 @@ function brevoRequest(payload, apiKey) {
             },
         };
 
+        console.log(`[Email] Initiating request to Brevo API...`);
         const req = https.request(options, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
+                console.log(`[Email] Brevo API responded with status: ${res.statusCode}`);
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     resolve(JSON.parse(data || '{}'));
                 } else {
@@ -49,8 +51,12 @@ function brevoRequest(payload, apiKey) {
             });
         });
 
-        req.on('error', reject);
-        req.setTimeout(15000, () => {
+        req.on('error', (err) => {
+            console.error(`[Email] Request error: ${err.message}`);
+            reject(err);
+        });
+        req.setTimeout(120000, () => {
+            console.error(`[Email] Request timed out after 120s`);
             req.destroy();
             reject(new Error('Request timeout'));
         });

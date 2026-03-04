@@ -172,7 +172,7 @@ router.delete("/users/:uid", async (req, res) => {
 router.post("/users/:uid/reject", async (req, res) => {
   try {
     const { uid } = req.params;
-    await auth.deleteUser(uid).catch(() => {});
+    await auth.deleteUser(uid).catch(() => { });
     await db.collection("users").doc(uid).delete();
     res.json({ success: true, message: "User deleted successfully" });
   } catch (error) {

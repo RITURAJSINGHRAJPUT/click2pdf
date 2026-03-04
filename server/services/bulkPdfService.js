@@ -338,7 +338,10 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
                     const filledFields = applyDataToFields(templateFields, dataRows[i], fieldMapping);
                     const copiedPages = await mergedPdf.copyPages(templatePdf, templatePageIndices);
                     copiedPages.forEach(page => mergedPdf.addPage(page));
+                    const timerName = `[Perf] Bulk Filling: ${jobId} (Row ${i + 1}/${dataRows.length})`;
+                    console.time(timerName);
                     await fillPdfPages(mergedPdf, copiedPages, filledFields, helveticaFont, helveticaBold);
+                    console.timeEnd(timerName);
                     job.processed = i + 1;
                 } catch (err) {
                     job.errors.push({ row: i + 1, error: err.message });
