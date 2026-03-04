@@ -278,9 +278,10 @@ function applyDataToFields(templateFields, dataRow, fieldMapping) {
  * @param {Object} options - Generation options
  */
 async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping, options = {}) {
-    const { merge = false, filenameField = null, userId = null } = options;
+    const { merge = false, filenameField = null, userId = null, userEmail = null } = options;
     const { StandardFonts } = require('pdf-lib');
     const { fillPdfPages } = require('./pdfGenerator');
+    const { sendPdfEmail } = require('./emailService');
 
     const job = {
         id: jobId,
@@ -392,6 +393,15 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
         }
 
         job.status = 'completed';
+
+        // Auto-email if userEmail is provided
+        if (userEmail && job.outputFile) {
+            const emailFilename = job.outputType === 'zip' ? 'filled-forms.zip' : 'filled-forms-merged.pdf';
+            console.log(`[Bulk Service] Auto-emailing results to ${userEmail}`);
+            sendPdfEmail(userEmail, job.outputFile, emailFilename)
+                .then(() => console.log(`[Bulk Service] Auto-email sent successfully to ${userEmail}`))
+                .catch(err => console.error(`[Bulk Service] Auto-email failed for ${userEmail}:`, err.message));
+        }
     } catch (err) {
         job.status = 'error';
         job.error = err.message;

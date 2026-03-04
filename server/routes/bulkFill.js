@@ -455,8 +455,17 @@ router.post('/generate/:filename', express.json(), async (req, res) => {
         // Start async job
         const jobId = uuidv4();
 
-        // Pass userId to options for generateBulkPDFs
-        const jobOptions = { ...options, userId };
+        // Pass userId and userEmail to options for generateBulkPDFs
+        let userEmail = null;
+        try {
+            const admin = require('firebase-admin');
+            const userRecord = await admin.auth().getUser(userId);
+            userEmail = userRecord.email;
+        } catch (e) {
+            console.warn(`[Bulk Gen] Could not retrieve email for user ${userId}:`, e.message);
+        }
+
+        const jobOptions = { ...options, userId, userEmail };
 
         // Launch generation in background
         generateBulkPDFs(jobId, filename, data, fieldMapping, jobOptions)
@@ -517,43 +526,8 @@ router.get('/download/:jobId', (req, res) => {
 
     const filename = job.outputType === 'zip' ? 'filled-forms.zip' : 'filled-forms-merged.pdf';
 
-    // Auto-email the file to the logged-in user
-    const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
-    const authHeader = req.headers.authorization || '';
-    let idToken = '';
-
-    if (authHeader.startsWith('Bearer ')) {
-        idToken = authHeader.split('Bearer ')[1];
-    }
-
-    if (sessionCookie || idToken) {
-        (async () => {
-            try {
-                const admin = require('firebase-admin');
-                let decodedClaims;
-
-                if (sessionCookie) {
-                    decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
-                } else {
-                    decodedClaims = await admin.auth().verifyIdToken(idToken, true);
-                }
-
-                let userEmail = decodedClaims.email;
-                if (!userEmail && decodedClaims.uid) {
-                    const userRecord = await admin.auth().getUser(decodedClaims.uid);
-                    userEmail = userRecord.email;
-                }
-                if (userEmail) {
-                    console.log(`[Bulk Download] Auto-emailing to: ${userEmail}`);
-                    const { sendPdfEmail } = require('../services/emailService');
-                    await sendPdfEmail(userEmail, job.outputFile, filename);
-                    console.log(`[Bulk Download] Email sent successfully to: ${userEmail}`);
-                }
-            } catch (err) {
-                console.error('[Bulk Download] Auto-email error:', err.message);
-            }
-        })();
-    }
+    // Auto-email is now handled in bulkPdfService.js after generation completes.
+    // This allows the user to receive the email sooner and avoids redundant emails.
 
     res.download(job.outputFile, filename, (err) => {
         if (!err) {
