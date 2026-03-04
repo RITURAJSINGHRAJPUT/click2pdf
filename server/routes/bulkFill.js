@@ -519,11 +519,25 @@ router.get('/download/:jobId', (req, res) => {
 
     // Auto-email the file to the logged-in user
     const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
-    if (sessionCookie) {
+    const authHeader = req.headers.authorization || '';
+    let idToken = '';
+
+    if (authHeader.startsWith('Bearer ')) {
+        idToken = authHeader.split('Bearer ')[1];
+    }
+
+    if (sessionCookie || idToken) {
         (async () => {
             try {
                 const admin = require('firebase-admin');
-                const decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                let decodedClaims;
+
+                if (sessionCookie) {
+                    decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                } else {
+                    decodedClaims = await admin.auth().verifyIdToken(idToken, true);
+                }
+
                 let userEmail = decodedClaims.email;
                 if (!userEmail && decodedClaims.uid) {
                     const userRecord = await admin.auth().getUser(decodedClaims.uid);

@@ -22,6 +22,16 @@ require('./config/firebase');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure necessary directories exist
+const storageDirs = ['../temp', '../data', '../data/users', '../pdf-format', 'uploads/payments'];
+storageDirs.forEach(dir => {
+    const fullPath = path.join(__dirname, dir);
+    if (!require('fs').existsSync(fullPath)) {
+        require('fs').mkdirSync(fullPath, { recursive: true });
+        console.log(`[Init] Created directory: ${fullPath}`);
+    }
+});
+
 // Middleware
 app.use(cors());
 app.use(compression());
