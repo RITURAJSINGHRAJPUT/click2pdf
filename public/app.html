@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon_io/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Click2PDF - Friendly PDF Filler</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4DD0E1">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-turquoise': '#E0F7FA',   // Keeping original for backwards compatibility in app.html
+                        'vibrant-turquoise': '#4DD0E1',
+                        'soft-coral': '#FFAB91',
+                        'vibrant-coral': '#FF7043',
+                        'sunny-yellow': '#FFF59D',
+                        'warm-yellow': '#FBC02D',
+                        'friendly-gray': '#546E7A',
+                        'friendly-navy': '#37474F',    // Added from index.html for footer
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'blob': '30% 70% 70% 30% / 30% 30% 70% 70%',
+                        'super-rounded': '2.5rem',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            background-color: #FCFDFF;
+            color: #546E7A;
+        }
+
+        .organic-shape {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+
+        .blob-1 {
+            border-radius: 41% 59% 41% 59% / 65% 36% 64% 35%;
+        }
+
+        .blob-2 {
+            border-radius: 65% 35% 71% 29% / 32% 57% 43% 68%;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .hand-drawn-border {
+            border: 3px solid currentColor;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+
+        /* Overrides for dynamic js elements */
+        .template-card {
+            background-color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 2.5rem;
+            border: 2px solid #E0F7FA;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .template-card:hover {
+            border-color: #4DD0E1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: scale(1.05);
+        }
+
+        .template-card:nth-child(even) {
+            transform: rotate(-1deg);
+            border-color: #FFAB91;
+        }
+
+        .template-card:nth-child(even):hover {
+            border-color: #FF7043;
+            transform: rotate(-1deg) scale(1.05);
+        }
+
+        .template-card:nth-child(3n) {
+            transform: rotate(1deg);
+            border-color: #FFF59D;
+        }
+
+        .template-card:nth-child(3n):hover {
+            border-color: #FBC02D;
+            transform: rotate(1deg) scale(1.05);
+        }
+
+        .template-card svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: #4DD0E1;
+        }
+
+        .template-card:nth-child(even) svg {
+            color: #FF7043;
+        }
+
+        .template-card:nth-child(3n) svg {
+            color: #FBC02D;
+        }
+
+        .template-card span {
+            font-weight: 700;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .template-locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .lock-badge {
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        /* Dragover state for upload */
+        #uploadZone.dragover {
+            background-color: rgba(224, 247, 250, 0.5);
+            /* soft-turquoise/50 */
+            border-color: #4DD0E1;
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Hide scrollbar on profile modal */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(77, 208, 225, 0.2);
+            border-top-color: #4DD0E1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script>
+        window.addEventListener('error', function (e) {
+            alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            alert('Promise Error: ' + e.reason);
+        });
+    </script>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col bg-slate-50">
+    <!-- Auth Check -->
+    <script type="module">
+        import { checkAuth } from './js/auth.js';
+        checkAuth(true); // Redirect to login if not authenticated
+    </script>
+
+    <nav
+        class="py-2 px-3 sm:px-6 md:px-8 max-w-7xl mx-auto flex justify-between items-center gap-2 sm:gap-4 relative z-20 border-b border-friendly-navy/10 shrink-0 w-full">
+        <a href="/app.html" class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div
+                class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center rounded-xl rotate-3 shadow-lg">
+                <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF"
+                    class="w-full h-full object-cover rounded-lg">
+            </div>
+            <span class="hidden sm:block font-bold text-xl tracking-tight text-vibrant-turquoise">Click2PDF</span>
+        </a>
+        <div class="flex items-center gap-2 sm:gap-4 justify-end">
+            <a href="/Buy-Credits.html"
+                class="flex font-bold items-center gap-1.5 bg-gradient-to-r from-warm-yellow to-[#FFAB91] px-2.5 py-1.5 sm:px-3 md:px-3 lg:py-1.5 rounded-xl text-slate-800 shadow-[0_4px_10px_rgba(251,192,45,0.3)] hover:-translate-y-1 hover:shadow-[0_6px_15px_rgba(251,192,45,0.4)] transition-all border-2 border-white/50 text-xs sm:text-sm">
+                <span class="material-symbols-outlined text-[16px] sm:text-[18px]">generating_tokens</span>
+                <span class="whitespace-nowrap hidden sm:inline">Buy Credits</span>
+                <span id="creditCounter"
+                    class="bg-white/50 px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs ml-0.5 sm:ml-1 hidden">...</span>
+            </a>
+            <!-- Profile Dropdown Menu -->
+            <div class="relative group" id="profileDropdownContainer">
+                <button id="profileMenuBtn"
+                    class="font-bold flex items-center gap-1.5 bg-white border-2 border-slate-100 hover:border-vibrant-turquoise shadow-[2px_2px_0px_0px_#e2e8f0] px-2.5 py-1.5 sm:px-3 md:px-3 lg:py-1.5 rounded-xl text-slate-600 hover:text-vibrant-turquoise hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#4DD0E1] transition-all text-xs sm:text-sm">
+                    <span class="material-symbols-outlined text-[16px] sm:text-[18px]">account_circle</span>
+                    <span class="whitespace-nowrap login-text hidden sm:inline">Profile</span>
+                    <span
+                        class="material-symbols-outlined text-[16px] transition-transform group-hover:rotate-180">expand_more</span>
+                </button>
+
+                <!-- Dropdown Content -->
+                <div
+                    class="absolute right-0 top-full mt-2 w-48 bg-white border-2 border-slate-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top-right scale-95 group-hover:scale-100">
+                    <div class="flex flex-col py-1">
+                        <button id="viewProfileOption"
+                            onclick="document.getElementById('profileModal').classList.remove('opacity-0','pointer-events-none');document.getElementById('profileModal').firstElementChild.classList.remove('scale-95');document.getElementById('profileModal').firstElementChild.classList.add('scale-100');"
+                            class="flex items-center gap-2 px-4 py-2 hover:bg-soft-turquoise transition-colors text-left text-sm font-bold text-slate-700 w-full group/item">
+                            <span
+                                class="material-symbols-outlined text-[18px] text-vibrant-turquoise group-hover/item:scale-110 transition-transform">person</span>
+                            View Profile
+                        </button>
+                        <div class="h-px bg-slate-100 my-1 mx-2"></div>
+                        <button id="logoutOption" onclick="window.logout()"
+                            class="flex items-center gap-2 px-4 py-2 hover:bg-soft-coral transition-colors text-left text-sm font-bold text-slate-700 w-full group/item">
+                            <span
+                                class="material-symbols-outlined text-[18px] text-vibrant-coral group-hover/item:scale-110 transition-transform">logout</span>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <a href="/admin"
+                class="bg-sunny-yellow text-warm-yellow border-2 border-warm-yellow px-4 py-1.5 rounded-full font-bold shadow-[4px_4px_0px_0px_#FBC02D] hover:translate-y-1 hover:shadow-none transition-all hidden text-sm shrink-0"
+                id="adminBtn">
+                Admin
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-1">
+        <section class="relative px-4 pt-10 pb-12 overflow-hidden">
+            <div class="absolute top-0 left-10 w-40 h-40 bg-soft-turquoise/40 blob-1 -z-10 animate-pulse"></div>
+            <div class="absolute bottom-0 right-10 w-48 h-48 bg-soft-coral/20 blob-2 -z-10"></div>
+
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-slate-800 mb-4 leading-tight">
+                    Lets Get Started !! <br />
+
+                    <svg class="absolute -bottom-1 left-0 w-full" fill="none" height="10" viewBox="0 0 200 10"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 9C30 3 170 3 199 9" stroke="#4DD0E1" stroke-linecap="round" stroke-width="4">
+                        </path>
+                    </svg>
+                    </span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+                    Say goodbye to boring forms. Fill, sign, and send documents in seconds with a smile!
+                </p>
+
+                <div class="relative max-w-lg mx-auto mb-10">
+                    <!-- Upload Dropzone -->
+                    <div id="uploadZone"
+                        class="relative bg-white border-4 border-dashed border-vibrant-turquoise p-6 md:p-10 rounded-[2rem] shadow-xl rotate-1 hover:rotate-0 transition-all cursor-pointer group">
+                        <div
+                            class="bg-soft-turquoise w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-4xl text-vibrant-turquoise">cloud_upload</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-700 mb-1">Pop your PDF here!</h3>
+                        <p class="text-sm text-slate-500 mb-4">Click to browse or just drag it in</p>
+                        <div
+                            class="inline-block px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            Up to 10MB • Stay Awesome
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf,application/pdf" class="hidden">
+
+                    <!-- Loading State -->
+                    <div id="uploadLoading"
+                        class="hidden relative bg-white border-4 border-dashed border-vibrant-turquoise p-6 rounded-[2rem] shadow-xl text-center">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <h3 class="text-xl font-bold text-slate-700">Working magic...</h3>
+                        <p class="text-slate-500 text-sm">Getting your PDF ready for you!</p>
+                    </div>
+
+                    <div
+                        class="absolute -top-4 -right-4 w-12 h-12 bg-sunny-yellow rounded-full flex items-center justify-center border-4 border-white shadow-lg rotate-12 hidden md:flex z-10">
+                        <span class="material-symbols-outlined text-warm-yellow text-2xl">celebration</span>
+                    </div>
+                </div>
+
+                <!-- Templates Section -->
+                <div id="templatesSection" class="flex flex-col items-center">
+                    <p class="font-bold text-sm text-vibrant-coral mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                        Need a quick start? Try a template Now:
+                    </p>
+                    <div id="templatesGrid" class="flex flex-wrap justify-center gap-3">
+                        <!-- Loading templates state -->
+                        <div class="flex items-center gap-2 text-slate-500 text-sm">
+                            <div class="spinner !border-[2px] !w-4 !h-4"></div>
+                            <span>Fetching secure templates...</span>
+                        </div>
+                    </div>
+
+                    <!-- My Saved Templates Section -->
+                    <div id="myTemplatesSection" class="mt-8 w-full max-w-2xl hidden">
+                        <p class="font-bold text-sm text-vibrant-turquoise mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">folder_special</span>
+                            My Saved Templates are :
+                        </p>
+                        <div id="myTemplatesGrid" class="flex flex-wrap justify-center gap-3"></div>
+                    </div>
+
+                    <!-- Bulk Fill Container -->
+                    <div id="bulkFillContainer" class="mt-10 hidden">
+                        <a href="/bulk-fill.html"
+                            class="bg-vibrant-turquoise text-white px-6 py-3 rounded-full font-bold text-lg shadow-[0_6px_0_0_#00ACC1] hover:shadow-[0_3px_0_0_#00ACC1] hover:translate-y-[3px] active:translate-y-[6px] transition-all flex items-center gap-2 mx-auto max-w-max">
+                            <span class="material-symbols-outlined">dynamic_feed</span>
+                            Bulk Fill Magic!
+                        </a>
+                        <p class="mt-3 text-xs font-medium text-slate-400">Fill hundreds of forms from one spreadsheet
+                            🪄</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Privacy Section -->
+        <section class="max-w-4xl mx-auto px-4 py-12">
+            <div
+                class="bg-soft-coral/10 rounded-[2rem] p-6 md:p-8 border-4 border-soft-coral/30 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                    <div
+                        class="w-16 h-16 bg-vibrant-coral text-white rounded-xl flex items-center justify-center shadow-md rotate-6 shrink-0">
+                        <span class="material-symbols-outlined text-3xl">lock</span>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Your Secret is Safe! 🔒</h3>
+                        <p class="text-base text-slate-600 font-medium leading-relaxed">
+                            We're like a digital shredder! All files are automatically deleted after 30 minutes.
+                            We never store your personal details—your privacy is our biggest priority.
+                        </p>
+                    </div>
+                </div>
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-vibrant-coral opacity-10 rounded-full"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Global App Footer -->
+    <footer class="bg-[#e3eaef] py-4 px-4 md:px-6 border-t border-friendly-navy/10 mt-auto shrink-0 w-full z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div
+                    class="w-6 h-6 flex items-center justify-center rounded-lg shadow-sm group-hover:rotate-6 transition-transform">
+                    <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF"
+                        class="w-full h-full object-cover rounded-lg">
+                </div>
+                <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+                 <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
+            </div>
+
+            <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">
+                <p>© 2026. Sparsh Digital Solutions.</p>
+                <div class="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded-full shadow-sm">
+                    <div class="w-2 h-2 bg-vibrant-turquoise rounded-full animate-[pulse_2s_ease-in-out_infinite]">
+                    </div>
+                    <span>Servers Happy</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Profile Modal -->
+    <div id="profileModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div
+            class="bg-white rounded-[2.5rem] w-full max-w-[400px] shadow-2xl border border-white overflow-hidden transform scale-95 transition-transform duration-300 relative max-h-[90vh] overflow-y-auto no-scrollbar pb-2">
+
+            <!-- Close Button -->
+            <button id="closeProfileModal"
+                class="absolute top-4 right-4 z-20 w-8 h-8 bg-white/30 backdrop-blur-sm hover:bg-white hover:text-vibrant-coral rounded-full flex items-center justify-center text-white/90 transition-all shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+
+            <!-- Header Gradient -->
+            <div class="h-32 bg-gradient-to-r from-warm-yellow via-soft-turquoise to-vibrant-turquoise relative"></div>
+
+            <!-- Profile Content -->
+            <div class="px-6 pb-6 -mt-16 relative z-10 w-full flex flex-col items-center">
+                <!-- Avatar & Badge -->
+                <div class="mb-3 relative inline-block">
+                    <div class="w-24 h-24 bg-soft-turquoise text-white rounded-full flex items-center justify-center border-[5px] border-white shadow-sm overflow-hidden p-0"
+                        id="modalProfileInitials">
+                        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=user&backgroundColor=b2ebf2"
+                            alt="Profile" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-vibrant-coral text-white px-3 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full shadow-md whitespace-nowrap z-10"
+                        id="modalRoleBadge">
+                        POWER FILL
+                    </div>
+                </div>
+
+                <h2 class="text-[22px] font-extrabold text-friendly-navy mt-1" id="modalDisplayName">Loading...</h2>
+                <p class="text-slate-500 font-semibold text-[11px] mb-6" id="modalJoinDate">Member since...</p>
+
+                <!-- Profile Form -->
+                <form id="modalProfileForm" class="w-full space-y-4">
+                    <div class="flex items-center gap-2 px-1 mb-1">
+                        <span class="material-symbols-outlined text-[#5C6BC0] text-[18px]">person</span>
+                        <h3 class="text-[13px] font-extrabold text-[#5C6BC0]">Personal Details</h3>
+                    </div>
+
+                    <div class="bg-[#F4F7FA] p-5 rounded-[1.5rem] border border-slate-100">
+                        <div class="space-y-4">
+                            <div>
+                                <label
+                                    class="block text-[9px] font-black text-[#6B7AE1] mb-1.5 uppercase tracking-widest ml-1">Full
+                                    Name</label>
+                                <input type="text" id="modalInputName" placeholder="E.g. Jane Doe"
+                                    class="w-full bg-white border border-slate-200 outline-none text-[#5C6BC0] font-bold px-4 py-2.5 rounded-xl focus:border-[#5C6BC0] focus:ring-2 focus:ring-[#5C6BC0]/20 transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-sm placeholder-[#9EADCE]">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-black text-[#6B7AE1] mb-1.5 uppercase tracking-widest ml-1">Email</label>
+                                    <input type="email" id="modalInputEmail" disabled
+                                        class="w-full bg-slate-50/80 border border-slate-200 outline-none text-slate-400 font-bold px-3 py-2.5 rounded-xl cursor-not-allowed shadow-inner text-[11px]">
+                                    <p class="text-[8px] text-slate-400 mt-1 ml-1">Email cannot be changed.</p>
+                                </div>
+                                <div class="flex flex-col">
+                                    <label
+                                        class="block text-[9px] font-black text-[#6B7AE1] mb-1.5 uppercase tracking-widest ml-1">Company</label>
+                                    <input type="text" id="modalInputCompany" placeholder="Optional"
+                                        class="w-full bg-white border border-slate-200 outline-none text-[#5C6BC0] font-bold px-3 py-2.5 rounded-xl focus:border-[#5C6BC0] focus:ring-2 focus:ring-[#5C6BC0]/20 transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-[11px] placeholder-[#9EADCE]">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-2">
+                        <button type="submit" id="modalSaveProfileBtn"
+                            class="w-full bg-vibrant-coral hover:bg-[#F4511E] text-white font-extrabold py-3.5 px-6 rounded-full shadow-[0_8px_20px_rgba(255,87,34,0.3)] hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(255,87,34,0.4)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]" id="modalSaveIcon">save</span>
+                            <span id="modalSaveText">Save Profile</span>
+                            <div id="modalSaveSpinner"
+                                class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin hidden">
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bottom decorative line -->
+            <div
+                class="h-1.5 bg-gradient-to-r from-warm-yellow via-soft-turquoise to-vibrant-turquoise w-full absolute bottom-0 left-0">
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Toast Container -->
+    <div class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2" id="profileToastContainer"></div>
+
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+
+    <!-- Profile Modal Logic -->
+    <script type="module">
+        import { getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Reuse the Firebase app already initialized by auth.js
+        const fbApp = getApp();
+        const fbAuth = getAuth(fbApp);
+        const db = getFirestore(fbApp);
+
+        const modal = document.getElementById('profileModal');
+        const closeBtn = document.getElementById('closeProfileModal');
+        const form = document.getElementById('modalProfileForm');
+        const els = {
+            initials: document.getElementById('modalProfileInitials'),
+            displayName: document.getElementById('modalDisplayName'),
+            joinDate: document.getElementById('modalJoinDate'),
+            roleBadge: document.getElementById('modalRoleBadge'),
+            inputName: document.getElementById('modalInputName'),
+            inputEmail: document.getElementById('modalInputEmail'),
+            inputCompany: document.getElementById('modalInputCompany'),
+            saveBtn: document.getElementById('modalSaveProfileBtn'),
+            saveText: document.getElementById('modalSaveText'),
+            saveIcon: document.getElementById('modalSaveIcon'),
+            saveSpinner: document.getElementById('modalSaveSpinner'),
+            toastContainer: document.getElementById('profileToastContainer')
+        };
+
+        let userDocRef = null;
+        let profileLoaded = false;
+
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.firstElementChild.classList.remove('scale-100');
+            modal.firstElementChild.classList.add('scale-95');
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeBtn.click();
+        });
+
+        // Load profile when auth is ready
+        onAuthStateChanged(fbAuth, async (user) => {
+            if (user && !profileLoaded) {
+                userDocRef = doc(db, 'users', user.uid);
+                try {
+                    const snap = await getDoc(userDocRef);
+                    if (snap.exists()) {
+                        const d = snap.data();
+                        const seedName = encodeURIComponent(d.fullName || user.email || 'user');
+                        els.initials.innerHTML = `<img src="https://api.dicebear.com/7.x/notionists/svg?seed=${seedName}&backgroundColor=b2ebf2" alt="Profile" class="w-full h-full object-cover">`;
+                        els.displayName.textContent = d.fullName || user.email.split('@')[0];
+
+                        let joinText = 'Member since recently';
+                        if (d.createdAt) {
+                            const date = d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
+                            if (!isNaN(date)) joinText = `Member since ${date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}`;
+                        }
+                        els.joinDate.textContent = joinText;
+
+                        els.roleBadge.classList.remove('hidden');
+                        if (d.isAdmin) {
+                            els.roleBadge.textContent = 'ADMIN 👑';
+                        } else if (d.bulkCredits && d.bulkCredits > 1) {
+                            els.roleBadge.textContent = 'PREMIUM USER';
+                        } else {
+                            els.roleBadge.textContent = 'STANDARD USER';
+                        }
+
+                        els.inputName.value = d.fullName || '';
+                        els.inputEmail.value = user.email;
+                        els.inputCompany.value = d.companyName || '';
+                    } else {
+                        els.displayName.textContent = user.email;
+                        els.inputEmail.value = user.email;
+                        const fallbackSeed = encodeURIComponent(user.email || 'user');
+                        els.initials.innerHTML = `<img src="https://api.dicebear.com/7.x/notionists/svg?seed=${fallbackSeed}&backgroundColor=b2ebf2" alt="Profile" class="w-full h-full object-cover">`;
+                    }
+                    profileLoaded = true;
+                } catch (err) {
+                    console.error('Profile load error:', err);
+                }
+            }
+        });
+
+        // Save profile
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userDocRef) return;
+
+            const newName = els.inputName.value.trim();
+            const newCompany = els.inputCompany.value.trim();
+
+            els.saveText.textContent = 'Saving...';
+            els.saveIcon.classList.add('hidden');
+            els.saveSpinner.classList.remove('hidden');
+            els.saveBtn.disabled = true;
+
+            try {
+                await updateDoc(userDocRef, { fullName: newName, companyName: newCompany });
+                els.displayName.textContent = newName || els.inputEmail.value.split('@')[0];
+                els.initials.textContent = (newName || els.inputEmail.value).charAt(0).toUpperCase();
+                showProfileToast('Profile updated successfully!', 'success');
+            } catch (err) {
+                console.error('Profile save error:', err);
+                showProfileToast('Failed to update profile.', 'error');
+            } finally {
+                els.saveText.textContent = 'Save Profile';
+                els.saveIcon.classList.remove('hidden');
+                els.saveSpinner.classList.add('hidden');
+                els.saveBtn.disabled = false;
+            }
+        });
+
+        function showProfileToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            toast.className = `p-4 rounded-xl shadow-lg border-2 flex items-center gap-3 transform translate-x-full transition-transform duration-300 ${isError ? 'bg-red-50 border-red-200 text-red-700' : 'bg-soft-turquoise border-vibrant-turquoise text-slate-700'
+                }`;
+            toast.innerHTML = `
+                <span class="material-symbols-outlined ${isError ? 'text-red-500' : 'text-vibrant-turquoise'} p-2 rounded-lg bg-white shadow-sm">
+                    ${isError ? 'error' : 'task_alt'}
+                </span>
+                <p class="font-bold pr-4">${message}</p>
+            `;
+            toast.style.animation = 'toast-slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+            if (!document.getElementById('profileToastKF')) {
+                const s = document.createElement('style');
+                s.id = 'profileToastKF';
+                s.innerHTML = '@keyframes toast-slide-in { 0% { transform: translateX(100%) scale(0.9); opacity: 0; } 100% { transform: translateX(0) scale(1); opacity: 1; } }';
+                document.head.appendChild(s);
+            }
+            els.toastContainer.appendChild(toast);
+            setTimeout(() => { toast.style.transform = 'translateX(100%)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+    </script>
+</body>
+
+</html>

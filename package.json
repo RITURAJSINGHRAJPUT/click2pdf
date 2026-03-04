@@ -1,0 +1,33 @@
+{
+  "name": "click2pdf",
+  "version": "1.0.0",
+  "description": "Click2PDF - Free online PDF form filler",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^13.6.1",
+    "multer": "^1.4.5-lts.1",
+    "papaparse": "^5.5.3",
+    "pdf-lib": "^1.17.1",
+    "uuid": "^9.0.0"
+  },
+  "keywords": [
+    "pdf",
+    "form",
+    "filler",
+    "free"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "sharp": "^0.34.5"
+  }
+}
