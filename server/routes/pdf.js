@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const upload = require('../middleware/upload');
 const { parsePDF } = require('../services/pdfParser');
-const { generateFilledPDF, saveGeneratedPDF } = require('../services/pdfGenerator');
+const { generateFilledPDF, saveGeneratedPDF, encryptPdfBuffer } = require('../services/pdfGenerator');
 const { deleteSessionFiles } = require('../utils/cleanup');
 const { db } = require('../config/firebase');
 
@@ -113,6 +113,10 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
     const session = sessions.get(sessionId);
     const userId = req.headers['x-user-id'];
 
+    // Auto-generate a random password for PDF protection
+    const crypto = require('crypto');
+    const password = crypto.randomBytes(4).toString('hex'); // 8-char hex password
+
     console.log(`[Generate] Request received for session: ${sessionId}, has-session: ${!!session}, cookie: ${!!(req.cookies && req.cookies.session)}`);
 
     if (!session) {
@@ -186,9 +190,14 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
             pdfBuffer = await generateFilledPDF(session.pdfPath, fieldsToUse, flatten);
         }
 
+        // Encrypt PDF with auto-generated password
+        console.log(`[Generate] Encrypting PDF with auto-generated password for session: ${sessionId}`);
+        pdfBuffer = encryptPdfBuffer(pdfBuffer, password);
+
         const filledPath = await saveGeneratedPDF(sessionId, pdfBuffer);
 
         session.filledPath = filledPath;
+        session.password = password;
         sessions.set(sessionId, session);
 
         // --- Auto-Email Feature ---
@@ -223,7 +232,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
                     console.log(`[Generate] Triggering background auto-email to: ${userEmail}`);
                     const { sendPdfEmail } = require('../services/emailService');
                     // Send email in background to avoid blocking the response
-                    sendPdfEmail(userEmail, filledPath, 'filled-form.pdf')
+                    sendPdfEmail(userEmail, filledPath, 'filled-form.pdf', session.password || null)
                         .then(() => console.log(`[Generate] Background email sent to ${userEmail}`))
                         .catch(err => console.error(`[Generate] Background email failed for ${userEmail}:`, err.message));
                     emailSent = true;
@@ -257,43 +266,7 @@ router.get('/download/:sessionId', async (req, res) => {
         return res.status(404).json({ error: 'Filled PDF not found. Please generate first.' });
     }
 
-    // Trigger auto-email in background (don't block the download)
-    const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
-    const authHeader = req.headers.authorization || '';
-    let idToken = '';
-
-    if (authHeader.startsWith('Bearer ')) {
-        idToken = authHeader.split('Bearer ')[1];
-    }
-
-    if (sessionCookie || idToken) {
-        (async () => {
-            try {
-                const admin = require('firebase-admin');
-                let decodedClaims;
-
-                if (sessionCookie) {
-                    decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
-                } else {
-                    decodedClaims = await admin.auth().verifyIdToken(idToken, true);
-                }
-
-                let userEmail = decodedClaims.email;
-                if (!userEmail && decodedClaims.uid) {
-                    const userRecord = await admin.auth().getUser(decodedClaims.uid);
-                    userEmail = userRecord.email;
-                }
-                if (userEmail) {
-                    console.log(`[Download] Auto-emailing PDF to: ${userEmail}`);
-                    const { sendPdfEmail } = require('../services/emailService');
-                    await sendPdfEmail(userEmail, filledPath, 'filled-form.pdf');
-                    console.log(`[Download] Email sent successfully to: ${userEmail}`);
-                }
-            } catch (err) {
-                console.error('[Download] Auto-email error:', err.message);
-            }
-        })();
-    }
+    // Email is already sent during /api/generate — no need to send again here
 
     res.download(filledPath, 'filled-form.pdf', (err) => {
         if (!err) {

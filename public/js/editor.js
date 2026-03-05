@@ -564,14 +564,12 @@ function setupDownloadButton(sessionId) {
     }
 
     downloadBtn?.addEventListener('click', async () => {
-        showLoading('Generating PDF...');
+        showLoading('Generating protected PDF...');
 
         try {
             // Get all page instances with their fields
             const allInstances = getAllInstanceFields();
             const flatten = flattenCheckbox?.checked || false;
-
-            // Determine if single or multiple instances
             const isSingleInstance = allInstances.length === 1;
 
             const userId = window.getCurrentUserId ? await window.getCurrentUserId() : null;
@@ -584,7 +582,7 @@ function setupDownloadButton(sessionId) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            // Generate PDF
+            // Generate PDF (server auto-generates password & encrypts)
             const generateRes = await fetch(`/api/generate/${sessionId}`, {
                 method: 'POST',
                 headers: headers,
@@ -598,7 +596,6 @@ function setupDownloadButton(sessionId) {
             if (!generateRes.ok) {
                 const errorData = await generateRes.json().catch(() => ({}));
 
-                // Handle insufficient credits (402)
                 if (generateRes.status === 402) {
                     hideLoading();
                     showToast(
@@ -619,20 +616,27 @@ function setupDownloadButton(sessionId) {
             hideLoading();
             const pageWord = allInstances.length > 1 ? `${allInstances.length} pages` : 'PDF';
 
-            // Show toast based on email status
-            if (generateData.emailSent) {
-                showToast(`${pageWord} downloaded & emailed successfully! 🚀`, 'success');
-            } else {
-                showToast(`${pageWord} downloaded! Starting new session...`, 'success');
-            }
-
             // Refresh credits badge
             fetchEditorCredits();
 
-            // Redirect to home after a delay
-            setTimeout(() => {
-                window.location.href = '/app.html';
-            }, 3000);
+            // Show toast — password is always emailed
+            if (generateData.emailSent) {
+                if (typeof window.showEmailSuccessPopup === 'function') {
+                    window.showEmailSuccessPopup();
+                } else {
+                    showToast(`🔒 ${pageWord} downloaded! Password has been emailed to you 📧`, 'success');
+                }
+
+                setTimeout(() => {
+                    window.location.href = '/app.html';
+                }, 5000);
+            } else {
+                showToast(`🔒 ${pageWord} downloaded with password protection!`, 'success');
+
+                setTimeout(() => {
+                    window.location.href = '/app.html';
+                }, 3000);
+            }
 
         } catch (error) {
             console.error('Download error:', error);

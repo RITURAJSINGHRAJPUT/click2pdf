@@ -9,7 +9,7 @@ const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
-const { generateFilledPDF } = require('./pdfGenerator');
+const { generateFilledPDF, encryptPdfBuffer } = require('./pdfGenerator');
 
 const TEMPLATES_DIR = path.join(__dirname, '../../pdf-format');
 const TEMP_DIR = path.join(__dirname, '../../temp');
@@ -282,6 +282,11 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
     const { StandardFonts } = require('pdf-lib');
     const { fillPdfPages } = require('./pdfGenerator');
     const { sendPdfEmail } = require('./emailService');
+    const crypto = require('crypto');
+
+    // Auto-generate a single password for the entire bulk job
+    const password = crypto.randomBytes(4).toString('hex'); // 8-char hex password
+    console.log(`[Bulk Service] Auto-generated password for job ${jobId}`);
 
     const job = {
         id: jobId,
@@ -349,8 +354,11 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
                 }
             }
 
+            const mergedBuffer = Buffer.from(await mergedPdf.save());
+            // Encrypt the merged PDF
+            const encryptedBuffer = encryptPdfBuffer(mergedBuffer, password);
             const outputPath = path.join(TEMP_DIR, `${jobId}_bulk.pdf`);
-            await fs.writeFile(outputPath, Buffer.from(await mergedPdf.save()));
+            await fs.writeFile(outputPath, encryptedBuffer);
             job.outputFile = outputPath;
             job.outputType = 'pdf';
         } else {
@@ -369,7 +377,9 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
                     // Flatten form fields
                     try { singlePdf.getForm().flatten(); } catch (e) { /* no form */ }
 
-                    pdfBuffers.push(Buffer.from(await singlePdf.save()));
+                    const rawBuffer = Buffer.from(await singlePdf.save());
+                    // Encrypt each individual PDF
+                    pdfBuffers.push(encryptPdfBuffer(rawBuffer, password));
 
                     let filename = `filled_${i + 1}.pdf`;
                     if (filenameField && dataRows[i][filenameField]) {
@@ -398,7 +408,7 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
         if (userEmail && job.outputFile) {
             const emailFilename = job.outputType === 'zip' ? 'filled-forms.zip' : 'filled-forms-merged.pdf';
             console.log(`[Bulk Service] Auto-emailing results to ${userEmail}`);
-            sendPdfEmail(userEmail, job.outputFile, emailFilename)
+            sendPdfEmail(userEmail, job.outputFile, emailFilename, password)
                 .then(() => console.log(`[Bulk Service] Auto-email sent successfully to ${userEmail}`))
                 .catch(err => console.error(`[Bulk Service] Auto-email failed for ${userEmail}:`, err.message));
         }
