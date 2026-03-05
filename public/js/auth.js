@@ -83,11 +83,11 @@ export function checkAuth(requireAuth = false, redirectIfAuth = false) {
             return;
           }
 
-          // Pass userData.approved as the bulk access flag (as per new requirements)
+          // Pass userData.allowBulkFill as the bulk access flag
           updateAuthUI(
             user,
             isAdminUser,
-            userData.approved === true || userData.allowBulkFill || false,
+            isAdminUser || userData.allowBulkFill === true,
             userData,
           );
         } else {
@@ -133,9 +133,10 @@ async function createUserDoc(user) {
       email: user.email,
       displayName: user.displayName || "",
       role: "student",
-      approved: false,
+      approved: true, // Now auto-approved upon registration
       active: true,
       allowedTemplates: [],
+      bulkCredits: 10, // Give 10 credits by default to verified new users
       createdAt: serverTimestamp(),
     });
     console.log("User document created in Firestore");
@@ -188,8 +189,8 @@ export async function hasBulkFillAccess() {
           const userDoc = await getDoc(doc(firestore, "users", user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
-            // Bulk fill access requires explicit admin approval now
-            if (data.approved || data.allowBulkFill) {
+            // Bulk fill access requires explicit admin approval now (the allowBulkFill flag)
+            if (data.allowBulkFill === true) {
               return resolve(true);
             }
           }
@@ -500,11 +501,14 @@ function updateAuthUI(
     });
   }
 
-  // Show bulk fill container to ALL authenticated users
-  // Credits are checked at generation time, not at access time
+  // Show bulk fill container only if user has access
   const bulkFillContainer = document.getElementById("bulkFillContainer");
   if (bulkFillContainer) {
-    bulkFillContainer.classList.remove("hidden");
+    if (allowBulkFill) {
+      bulkFillContainer.classList.remove("hidden");
+    } else {
+      bulkFillContainer.classList.add("hidden");
+    }
   }
 
   // Auto-open profile modal if requested via URL
