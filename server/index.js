@@ -80,7 +80,7 @@ app.get('/robots.txt', (req, res) => {
     res.type('text/plain');
     res.send(`User-agent: *
 Allow: /
-Sitemap: https://click2pdf.in/sitemap.xml`);
+Sitemap: ${process.env.DOMAIN || 'https://click2pdf.in'}/sitemap.xml`);
 });
 
 // Serve dynamic sitemap.xml
@@ -89,6 +89,8 @@ app.get('/sitemap.xml', (req, res) => {
         '/',
         '/login.html',
         '/Buy-Credits.html',
+        '/bulk-fill.html',
+        '/contact.html',
         '/privacy-policy.html',
         '/return-policy.html',
         '/refund-policy.html',
@@ -101,7 +103,7 @@ app.get('/sitemap.xml', (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     ${urls.map(url => `
     <url>
-        <loc>https://click2pdf.in${url}</loc>
+        <loc>${process.env.DOMAIN || 'https://click2pdf.in'}${url}</loc>
         <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>${url === '/' ? '1.0' : '0.8'}</priority>
