@@ -74,7 +74,7 @@ function brevoRequest(payload, apiKey) {
  * @param {string} pdfPath - Absolute path to the PDF
  * @param {string} filename - Attachment filename
  */
-async function sendPdfEmail(toEmail, pdfPath, filename = 'filled-form.pdf') {
+async function sendPdfEmail(toEmail, pdfPath, filename = 'filled-form.pdf', password = null) {
     if (!toEmail) throw new Error('Recipient email address is required');
     if (!fs.existsSync(pdfPath)) throw new Error('PDF file not found');
 
@@ -123,20 +123,105 @@ async function sendPdfEmail(toEmail, pdfPath, filename = 'filled-form.pdf') {
     const fileBase64 = fileBuffer.toString('base64');
     const mimeType = attachFilename.endsWith('.zip') ? 'application/zip' : 'application/pdf';
 
+    const siteUrl = process.env.DOMAIN || 'https://click2pdf.in';
+    const logoUrl = `${siteUrl}/assets/favicon_io/logo2.png`;
+
     const payload = {
         sender: { name: fromName, email: fromEmail },
         to: [{ email: toEmail }],
-        subject: 'Your Completed PDF Document',
+        subject: password ? '🔒 Your Secured PDF is Ready — Click2PDF' : '📄 Your PDF Document is Ready — Click2PDF',
         htmlContent: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #4a5568;">Your Document is Ready!</h2>
-                <p>Hello,</p>
-                <p>Your filled PDF document has been generated and is attached to this email.</p>
-                ${wasCompressed ? '<p><em>Note: The file was compressed into a ZIP archive to fit email size limits.</em></p>' : ''}
-                <p>If you have any questions or need further assistance, please let us know.</p>
-                <br/>
-                <p style="color: #718096; font-size: 14px;">Thank you for using our service!</p>
-            </div>
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0f4f8; padding: 32px 16px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+
+    <!-- Header with gradient -->
+    <tr>
+        <td style="background: linear-gradient(135deg, #4DD0E1 0%, #00ACC1 50%, #00838F 100%); padding: 32px 40px; text-align: center;">
+            <img src="${logoUrl}" alt="Click2PDF" width="56" height="56" style="border-radius: 12px; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;" />
+            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Your Document is Ready</h1>
+            <p style="margin: 8px 0 0; color: rgba(255,255,255,0.85); font-size: 14px;">Powered by Click2PDF</p>
+        </td>
+    </tr>
+
+    <!-- Body -->
+    <tr>
+        <td style="padding: 36px 40px 20px;">
+            <p style="margin: 0 0 16px; color: #1a202c; font-size: 16px; line-height: 1.6;">Hi there 👋</p>
+            <p style="margin: 0 0 24px; color: #4a5568; font-size: 15px; line-height: 1.7;">
+                Your filled PDF document has been generated and is attached to this email. ${wasCompressed ? '<br/><em style="color: #718096; font-size: 13px;">📦 The file was compressed into a ZIP archive due to its size.</em>' : ''}
+            </p>
+
+            ${password ? `
+            <!-- Password Card -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 28px;">
+            <tr><td style="background: linear-gradient(135deg, #FFF8E1 0%, #FFF3CD 100%); border: 1px solid #FFD54F; border-radius: 12px; padding: 24px 28px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="36" valign="top"><span style="font-size: 24px;">🔐</span></td>
+                    <td style="padding-left: 12px;">
+                        <p style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #E65100; text-transform: uppercase; letter-spacing: 1px;">Password Protected</p>
+                        <p style="margin: 0 0 12px; color: #795548; font-size: 14px; line-height: 1.5;">Use this password to open your document:</p>
+                        <table cellpadding="0" cellspacing="0"><tr>
+                            <td style="background-color: #ffffff; border: 2px dashed #FFB300; border-radius: 8px; padding: 12px 24px;">
+                                <code style="font-size: 22px; font-weight: 800; color: #E65100; letter-spacing: 3px; font-family: 'Courier New', Courier, monospace;">${password}</code>
+                            </td>
+                        </tr></table>
+                        <p style="margin: 12px 0 0; color: #a1887f; font-size: 12px;">⚠️ Keep this password safe. You'll need it every time you open this file.</p>
+                    </td>
+                </tr>
+                </table>
+            </td></tr>
+            </table>
+            ` : ''}
+
+            <!-- File Info -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 28px;">
+            <tr><td style="background-color: #f7fafc; border-radius: 10px; padding: 16px 20px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="40" valign="top"><span style="font-size: 28px;">📎</span></td>
+                    <td style="padding-left: 12px;">
+                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #2d3748;">${attachFilename}</p>
+                        <p style="margin: 4px 0 0; font-size: 12px; color: #a0aec0;">Attached to this email • ${fileSizeMB} MB</p>
+                    </td>
+                </tr>
+                </table>
+            </td></tr>
+            </table>
+
+            <p style="margin: 0; color: #718096; font-size: 14px; line-height: 1.6;">
+                Need help? Just reply to this email or visit our <a href="${siteUrl}/contact.html" style="color: #4DD0E1; text-decoration: none; font-weight: 600;">support page</a>.
+            </p>
+        </td>
+    </tr>
+
+    <!-- Divider -->
+    <tr><td style="padding: 0 40px;"><hr style="border: none; border-top: 1px solid #e2e8f0; margin: 0;" /></td></tr>
+
+    <!-- Footer -->
+    <tr>
+        <td style="padding: 24px 40px 32px; text-align: center;">
+            <p style="margin: 0 0 8px; color: #a0aec0; font-size: 12px;">
+                © ${new Date().getFullYear()} Sparsh Digital Solutions • <a href="${siteUrl}" style="color: #4DD0E1; text-decoration: none;">click2pdf.in</a>
+            </p>
+            <p style="margin: 0; color: #cbd5e0; font-size: 11px;">
+                <a href="${siteUrl}/privacy-policy.html" style="color: #a0aec0; text-decoration: none;">Privacy</a> &nbsp;•&nbsp;
+                <a href="${siteUrl}/return-policy.html" style="color: #a0aec0; text-decoration: none;">Terms</a> &nbsp;•&nbsp;
+                <a href="${siteUrl}/contact.html" style="color: #a0aec0; text-decoration: none;">Contact</a>
+            </p>
+        </td>
+    </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
         `,
         attachment: [
             {

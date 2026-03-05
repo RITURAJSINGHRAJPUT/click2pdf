@@ -189,3 +189,42 @@ window.showModal = showModal;
 window.hideModal = hideModal;
 window.updateFieldsList = updateFieldsList;
 window.updateFieldProperties = updateFieldProperties;
+
+/**
+ * Show a 5-second success popup for email delivery
+ */
+function showEmailSuccessPopup() {
+    let popup = document.getElementById('emailSuccessPopup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'emailSuccessPopup';
+        popup.className = 'fixed inset-0 z-[100] flex items-center justify-center pointer-events-none transition-opacity duration-300 opacity-0';
+        popup.innerHTML = `
+            <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full mx-4 border-4 border-vibrant-turquoise text-center transform scale-95 transition-transform duration-300 pointer-events-auto flex flex-col items-center">
+                <div class="w-20 h-20 bg-soft-turquoise rounded-[1.5rem] flex items-center justify-center mb-6 rotate-3">
+                    <span class="material-symbols-outlined text-vibrant-turquoise text-5xl">mark_email_read</span>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800 mb-2">Success! 🎉</h3>
+                <p class="text-slate-600 font-bold mb-4 flex-1">Your PDF is downloaded.</p>
+                <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 w-full">
+                    <p class="text-sm font-bold text-slate-500">The PDF and its <span class="text-vibrant-turquoise border-b-2 border-vibrant-turquoise">password</span> have been emailed to you.</p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(popup);
+    }
+
+    // Show it
+    popup.classList.remove('opacity-0');
+    popup.firstElementChild.classList.remove('scale-95');
+    popup.firstElementChild.classList.add('scale-100');
+
+    // Hide after 5 seconds
+    setTimeout(() => {
+        popup.classList.add('opacity-0');
+        popup.firstElementChild.classList.remove('scale-100');
+        popup.firstElementChild.classList.add('scale-95');
+    }, 5000);
+}
+
+window.showEmailSuccessPopup = showEmailSuccessPopup;

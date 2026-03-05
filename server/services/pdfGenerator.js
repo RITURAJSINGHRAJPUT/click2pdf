@@ -389,4 +389,42 @@ async function saveGeneratedPDF(sessionId, pdfBuffer) {
     return filledPath;
 }
 
-module.exports = { generateFilledPDF, saveGeneratedPDF, fillPdfPages };
+/**
+ * Encrypt a PDF buffer with a user password using muhammara
+ * @param {Buffer} pdfBuffer - The unencrypted PDF buffer
+ * @param {string} password - The user password to set
+ * @returns {Buffer} - The encrypted PDF buffer
+ */
+function encryptPdfBuffer(pdfBuffer, password) {
+    const muhammara = require('muhammara');
+    const fsSync = require('fs');
+    const pathLib = require('path');
+    const crypto = require('crypto');
+
+    const tempDir = pathLib.join(__dirname, '../../temp');
+    const tempId = crypto.randomBytes(8).toString('hex');
+    const inputPath = pathLib.join(tempDir, `_enc_in_${tempId}.pdf`);
+    const outputPath = pathLib.join(tempDir, `_enc_out_${tempId}.pdf`);
+
+    try {
+        // Write input buffer to a temp file
+        fsSync.writeFileSync(inputPath, pdfBuffer);
+
+        // Encrypt using muhammara recrypt
+        muhammara.recrypt(inputPath, outputPath, {
+            userPassword: password,
+            ownerPassword: password,
+            userProtectionFlag: 4 // Allow printing
+        });
+
+        // Read the encrypted output
+        const encryptedBuffer = fsSync.readFileSync(outputPath);
+        return encryptedBuffer;
+    } finally {
+        // Cleanup temp files
+        try { fsSync.unlinkSync(inputPath); } catch (e) { }
+        try { fsSync.unlinkSync(outputPath); } catch (e) { }
+    }
+}
+
+module.exports = { generateFilledPDF, saveGeneratedPDF, fillPdfPages, encryptPdfBuffer };
