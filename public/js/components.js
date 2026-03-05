@@ -204,10 +204,10 @@ function showEmailSuccessPopup() {
                 <div class="w-20 h-20 bg-soft-turquoise rounded-[1.5rem] flex items-center justify-center mb-6 rotate-3">
                     <span class="material-symbols-outlined text-vibrant-turquoise text-5xl">mark_email_read</span>
                 </div>
-                <h3 class="text-2xl font-black text-slate-800 mb-2">Success! 🎉</h3>
-                <p class="text-slate-600 font-bold mb-4 flex-1">Your PDF is downloaded.</p>
+                <h3 class="text-2xl font-black text-slate-800 mb-2">Successfully Generated! 🎉</h3>
+                <p class="text-slate-600 font-bold mb-4 flex-1">Your secure document has been delivered to your registered email address. You may also proceed with the local download below.</p>
                 <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 w-full">
-                    <p class="text-sm font-bold text-slate-500">The PDF and its <span class="text-vibrant-turquoise border-b-2 border-vibrant-turquoise">password</span> have been emailed to you.</p>
+                    <p class="text-sm font-bold text-slate-500">To open your file, please retrieve the <span class="text-vibrant-turquoise border-b-2 border-vibrant-turquoise">secure password</span> sent to your inbox.</p>
                 </div>
             </div>
         `;

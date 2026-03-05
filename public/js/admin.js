@@ -175,6 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-warm-yellow hover:bg-sunny-yellow/30 transition-colors" title="Toggle Bulk Fill" onclick="adminActions.toggleBulkFill('${user.uid}')">
                         <span class="material-symbols-outlined text-[18px]">layers</span>
                     </button>
+                    <button class="w-7 h-7 rounded-lg border-2 border-slate-300 bg-slate-50 flex items-center justify-center text-slate-600 hover:text-vibrant-turquoise hover:border-vibrant-turquoise hover:bg-soft-turquoise/10 transition-all mx-1 shadow-sm" title="Manage Credits" onclick="adminActions.manageCredits('${user.uid}', ${user.bulkCredits || 0})">
+                        <span class="material-symbols-outlined text-[16px]">toll</span>
+                    </button>
                     <button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-vibrant-coral hover:bg-soft-coral/30 transition-colors" title="Deactivate" onclick="adminActions.toggleActive('${user.uid}')">
                         <span class="material-symbols-outlined text-[18px]">block</span>
                     </button>
@@ -221,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </td>
                     <td class="px-5 py-3 text-right align-middle">
-                        <div class="flex items-center justify-end gap-1.5 transition-opacity">
+                        <div class="flex items-center justify-end gap-1.5 opacity-100">
                             ${actions}
                         </div>
                     </td>
@@ -422,9 +425,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errData = await res.json().catch(() => ({}));
                     throw new Error(errData.error || `Error ${res.status}`);
                 }
+                const data = await res.json();
                 await loadUsers();
-                showToast('Bulk Fill access updated');
+                if (data.allowBulkFill) {
+                    showToast('Bulk Fill access turned ON for user');
+                } else {
+                    showToast('Bulk Fill access turned OFF for user');
+                }
             } catch (error) { showToast(`Failed to update Bulk Fill: ${error.message}`, 'error'); }
+        },
+
+        manageCredits: async (uid, currentCredits) => {
+            const newCreditsStr = prompt(`Enter new amount of credits for this user (Current: ${currentCredits}):`, currentCredits);
+            if (newCreditsStr === null) return; // User cancelled
+
+            const newCredits = parseInt(newCreditsStr, 10);
+            if (isNaN(newCredits) || newCredits < 0) {
+                showToast('Please enter a valid positive number', 'error');
+                return;
+            }
+
+            try {
+                const headers = await getAuthHeaders();
+                const res = await fetch(`/api/admin/users/${uid}/credits`, {
+                    method: 'PUT',
+                    headers,
+                    body: JSON.stringify({ bulkCredits: newCredits })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || `Error ${res.status}`);
+                }
+
+                await loadUsers();
+                showToast(`Credits updated to ${newCredits} successfully`);
+            } catch (error) { showToast(`Failed to update credits: ${error.message}`, 'error'); }
         },
 
         goToPage: (page) => {
