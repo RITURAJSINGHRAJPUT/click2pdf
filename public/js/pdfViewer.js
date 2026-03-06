@@ -122,8 +122,8 @@ class PDFViewer {
      * Zoom in
      */
     async zoomIn() {
-        if (this.scale < 2.0) {
-            this.scale = Math.min(2.0, this.scale + 0.25);
+        if (this.scale < 3.0) {
+            this.scale = Math.min(3.0, this.scale + 0.25);
             await this.renderPage(this.currentPage);
         }
     }
@@ -142,7 +142,7 @@ class PDFViewer {
      * Set zoom level
      */
     async setZoom(scale) {
-        this.scale = Math.max(0.5, Math.min(2.0, scale));
+        this.scale = Math.max(0.5, Math.min(3.0, scale));
         await this.renderPage(this.currentPage);
     }
 

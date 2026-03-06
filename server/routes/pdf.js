@@ -130,22 +130,23 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
             const userDoc = await db.collection('users').doc(userId).get();
             if (userDoc.exists) {
                 const userData = userDoc.data();
-                const requiredCredits = (instances && instances.length > 1) ? instances.length : 1;
-                const currentCredits = userData.bulkCredits || 0;
+                if (userData.role === 'admin') {
+                    console.log(`[Generate] User ${userId} is an admin. Unlimited credits granted.`);
+                } else {
+                    if (currentCredits < requiredCredits) {
+                        return res.status(402).json({
+                            error: `Insufficient credits. You need ${requiredCredits} credit(s) but only have ${currentCredits}. Please purchase more credits.`,
+                            creditsNeeded: requiredCredits,
+                            creditsAvailable: currentCredits
+                        });
+                    }
 
-                if (currentCredits < requiredCredits) {
-                    return res.status(402).json({
-                        error: `Insufficient credits. You need ${requiredCredits} credit(s) but only have ${currentCredits}. Please purchase more credits.`,
-                        creditsNeeded: requiredCredits,
-                        creditsAvailable: currentCredits
+                    // Deduct credits
+                    await db.collection('users').doc(userId).update({
+                        bulkCredits: currentCredits - requiredCredits
                     });
+                    console.log(`[Generate] Deducted ${requiredCredits} credit(s) from user ${userId}. Remaining: ${currentCredits - requiredCredits}`);
                 }
-
-                // Deduct credits
-                await db.collection('users').doc(userId).update({
-                    bulkCredits: currentCredits - requiredCredits
-                });
-                console.log(`[Generate] Deducted ${requiredCredits} credit(s) from user ${userId}. Remaining: ${currentCredits - requiredCredits}`);
             }
         }
 

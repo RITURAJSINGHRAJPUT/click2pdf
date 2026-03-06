@@ -557,7 +557,7 @@ async function fetchEditorCredits() {
             const badge = document.getElementById('editorCreditsBadge');
             const count = document.getElementById('editorCreditsCount');
             if (badge && count) {
-                count.textContent = data.bulkCredits || 0;
+                count.textContent = window.isAdmin ? 'Unlimited' : (data.bulkCredits || 0);
                 badge.classList.remove('hidden');
                 badge.classList.add('flex');
             }

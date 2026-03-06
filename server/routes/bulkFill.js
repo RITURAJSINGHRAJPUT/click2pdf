@@ -438,19 +438,21 @@ router.post('/generate/:filename', express.json(), async (req, res) => {
         }
 
         const userData = userDoc.data();
-        const requiredCredits = data.length;
-        const currentCredits = userData.bulkCredits || 0;
+        if (userData.role === 'admin') {
+            console.log(`[Bulk Gen] User ${userId} is an admin. Unlimited credits granted.`);
+        } else {
+            if (currentCredits < requiredCredits) {
+                return res.status(402).json({
+                    error: `Insufficient credits. You need ${requiredCredits} credits but only have ${currentCredits}. Please contact an admin.`
+                });
+            }
 
-        if (currentCredits < requiredCredits) {
-            return res.status(402).json({
-                error: `Insufficient credits. You need ${requiredCredits} credits but only have ${currentCredits}. Please contact an admin.`
+            // Deduct credits
+            await db.collection('users').doc(userId).update({
+                bulkCredits: currentCredits - requiredCredits
             });
+            console.log(`[Bulk Gen] Deducted ${requiredCredits} credit(s) from user ${userId}. Remaining: ${currentCredits - requiredCredits}`);
         }
-
-        // Deduct credits
-        await db.collection('users').doc(userId).update({
-            bulkCredits: currentCredits - requiredCredits
-        });
 
         // Start async job
         const jobId = uuidv4();

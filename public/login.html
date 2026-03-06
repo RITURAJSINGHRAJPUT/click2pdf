@@ -27,7 +27,7 @@
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
       rel="stylesheet"
     />
     <link rel="manifest" href="/manifest.json" />
@@ -106,6 +106,27 @@
           "opsz" 48;
         display: inline-block;
         vertical-align: middle;
+        /* Prevent text flash while loading */
+        width: 1em;
+        height: 1em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-indent: -9999px; /* Hide text */
+      }
+      
+      .material-symbols-outlined::before {
+        content: attr(data-icon); /* Alternative if we used data-icon, but for ligatures we need another way */
+      }
+      
+      /* Standard fix for Material Symbols ligatures */
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        text-transform: none;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
       }
 
       /* Custom scrollbar for full screen container */
@@ -182,11 +203,6 @@
             ></path>
           </svg>
         </div>
-        <span
-          class="material-symbols-outlined absolute top-1/3 left-1/4 text-warm-yellow text-3xl opacity-80"
-          style="font-variation-settings: &quot;FILL&quot; 0"
-          >star</span
-        >
         <div
           class="relative mb-6 transition-transform hover:scale-105 duration-300"
         >
@@ -217,10 +233,6 @@
           class="mt-4 text-base font-bold text-friendly-navy/60 text-center max-w-xs relative z-10"
         >
           Log in to start tickling those PDFs and making paperwork play.
-          <span
-            class="material-symbols-outlined text-vibrant-turquoise text-2xl align-middle ml-1"
-            >star</span
-          >
         </div>
       </div>
 
@@ -250,11 +262,6 @@
           <div
             class="bg-white p-6 md:p-8 rounded-[2rem] card-shadow border-[3px] border-dashed border-[#e6f7f9] relative"
           >
-            <span
-              class="material-symbols-outlined absolute -top-3 -right-3 text-vibrant-coral text-4xl rotate-12"
-              style="font-variation-settings: &quot;FILL&quot; 1"
-              >auto_awesome</span
-            >
 
             <!-- Waiting for Approval Screen -->
             <div
@@ -266,10 +273,6 @@
                 <div
                   class="bg-soft-turquoise w-16 h-16 rounded-full flex items-center justify-center animate-[pulse_2s_ease-in-out_infinite]"
                 >
-                  <span
-                    class="material-symbols-outlined text-vibrant-turquoise text-3xl"
-                    >hourglass_empty</span
-                  >
                 </div>
               </div>
               <h2 class="text-2xl font-black text-friendly-navy mb-2">
@@ -368,6 +371,7 @@
                   <label class="flex items-center gap-2 cursor-pointer group">
                     <div class="relative flex items-center">
                       <input
+                        id="rememberMe"
                         class="w-5 h-5 rounded-md border-2 border-[#d9f2f5] text-vibrant-turquoise focus:ring-vibrant-turquoise focus:ring-offset-0 cursor-pointer appearance-none checked:bg-vibrant-turquoise transition-all"
                         type="checkbox"
                       />
@@ -378,6 +382,7 @@
                     >
                   </label>
                   <a
+                    id="forgotPasswordLink"
                     class="text-xs font-bold text-vibrant-turquoise hover:text-vibrant-coral transition-colors underline underline-offset-4 decoration-2"
                     href="#"
                     >Forgot?</a
@@ -492,7 +497,7 @@
 
     <!-- Auth Scripts -->
     <script type="module">
-      import { login, register, checkAuth, logout } from "./js/auth.js";
+      import { login, register, checkAuth, logout, forgotPassword } from "./js/auth.js";
 
       // Check if already logged in (redirect to app if approved, show waiting if not)
       checkAuth(false, true);
@@ -603,7 +608,8 @@
 
         let result;
         if (isLogin) {
-          result = await login(email, password);
+          const rememberMe = document.getElementById("rememberMe").checked;
+          result = await login(email, password, rememberMe);
         } else {
           // Registration Password Validation
           if (password.length < 8) {
@@ -651,6 +657,36 @@
           errorMessage.style.display = "block";
           submitBtn.innerHTML = isLogin ? "Let's Go! 🚀" : "Sign Up ✨";
           submitBtn.disabled = false;
+        }
+      });
+
+      // Handle Forgot Password
+      const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+      forgotPasswordLink.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        
+        if (!email) {
+          errorMessage.textContent = "Please enter your email address first.";
+          errorMessage.style.display = "block";
+          errorMessage.classList.remove("bg-vibrant-coral/10", "text-vibrant-coral", "border-vibrant-coral/20");
+          errorMessage.classList.add("bg-sunny-yellow/20", "text-friendly-navy", "border-warm-yellow/30");
+          return;
+        }
+
+        errorMessage.textContent = "Sending reset link...";
+        errorMessage.style.display = "block";
+        
+        const result = await forgotPassword(email);
+        
+        if (result.success) {
+          errorMessage.textContent = "Password reset link sent! Check your inbox.";
+          errorMessage.classList.remove("bg-vibrant-coral/10", "text-vibrant-coral", "border-vibrant-coral/20");
+          errorMessage.classList.add("bg-vibrant-turquoise/10", "text-vibrant-turquoise", "border-vibrant-turquoise/20");
+        } else {
+          errorMessage.textContent = result.error;
+          errorMessage.classList.add("bg-vibrant-coral/10", "text-vibrant-coral", "border-vibrant-coral/20");
+          errorMessage.classList.remove("bg-vibrant-turquoise/10", "text-vibrant-turquoise", "border-vibrant-turquoise/20");
         }
       });
     </script>
