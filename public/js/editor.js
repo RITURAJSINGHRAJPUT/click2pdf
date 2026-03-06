@@ -548,8 +548,14 @@ async function fetchEditorCredits() {
         const userId = window.getCurrentUserId ? await window.getCurrentUserId() : null;
         if (!userId) return;
 
+        const token = window.getFirebaseToken ? await window.getFirebaseToken() : null;
+        const headers = { 'x-user-id': userId };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const res = await fetch('/api/bulk/credits', {
-            headers: { 'x-user-id': userId }
+            headers: headers
         });
 
         if (res.ok) {

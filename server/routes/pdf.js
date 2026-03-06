@@ -130,6 +130,9 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
             const userDoc = await db.collection('users').doc(userId).get();
             if (userDoc.exists) {
                 const userData = userDoc.data();
+                const currentCredits = userData.bulkCredits || 0;
+                const requiredCredits = (instances && instances.length > 0) ? instances.length : 1;
+                
                 if (userData.role === 'admin') {
                     console.log(`[Generate] User ${userId} is an admin. Unlimited credits granted.`);
                 } else {
@@ -251,7 +254,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
         res.json({ success: true, downloadReady: true, emailSent });
     } catch (error) {
         console.error('Generate error:', error);
-        res.status(500).json({ error: 'Failed to generate PDF' });
+        res.status(500).json({ error: 'Failed to generate PDF', details: error.message, stack: error.stack });
     }
 });
 

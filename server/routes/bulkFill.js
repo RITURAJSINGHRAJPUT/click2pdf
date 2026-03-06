@@ -438,6 +438,8 @@ router.post('/generate/:filename', express.json(), async (req, res) => {
         }
 
         const userData = userDoc.data();
+        const currentCredits = userData.bulkCredits || 0;
+        const requiredCredits = data.length;
         if (userData.role === 'admin') {
             console.log(`[Bulk Gen] User ${userId} is an admin. Unlimited credits granted.`);
         } else {
