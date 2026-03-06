@@ -17,7 +17,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
         rel="stylesheet" />
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#00BCD4">
@@ -56,6 +56,11 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 48;
             vertical-align: middle;
+            /* Prevent text flash while loading */
+            width: 1em;
+            height: 1em;
+            overflow: hidden;
+            white-space: nowrap;
         }
 
         .glass-card {

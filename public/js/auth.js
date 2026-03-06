@@ -9,6 +9,10 @@ import {
   sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   getFirestore,
@@ -217,8 +221,14 @@ export async function getIdToken() {
 /**
  * Login function
  */
-export async function login(email, password) {
+export async function login(email, password, rememberMe = false) {
   try {
+    // Set persistence based on rememberMe
+    const persistence = rememberMe
+      ? browserLocalPersistence
+      : browserSessionPersistence;
+    await setPersistence(auth, persistence);
+
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
@@ -238,6 +248,18 @@ export async function login(email, password) {
     }
 
     return { success: true, user: userCredential.user };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Forgot Password function
+ */
+export async function forgotPassword(email) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return { success: true, message: "Password reset email sent!" };
   } catch (error) {
     return { success: false, error: error.message };
   }
