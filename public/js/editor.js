@@ -4,6 +4,7 @@
 
 // Store template filename for saving
 let currentTemplateFilename = null;
+let pdfPassword = null; // Store password if PDF is protected
 
 // Page instance tracking - stores field values for each copy
 let pageInstances = [];
@@ -56,10 +57,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initialize PDF Viewer
         window.pdfViewer = new PDFViewer('pdfViewer', 'pdfCanvas');
+        
+        // Helper for loading PDF with password support
+        async function loadPdfWithPassword(url, password = null) {
+            try {
+                return await window.pdfViewer.loadPDF(url, password);
+            } catch (error) {
+                if (error.name === 'PasswordException') {
+                    const pass = prompt('This PDF is password protected. Please enter the password:');
+                    if (pass === null) {
+                        throw new Error('Password required to view this PDF');
+                    }
+                    pdfPassword = pass; // Store for later
+                    return await loadPdfWithPassword(url, pass);
+                }
+                throw error;
+            }
+        }
+
         if (sessionId) {
-            await window.pdfViewer.loadPDF(`/api/pdf/${sessionId}`);
+            await loadPdfWithPassword(`/api/pdf/${sessionId}`);
         } else {
-            await window.pdfViewer.loadPDF(`/templates/${encodeURIComponent(currentTemplateFilename)}`);
+            await loadPdfWithPassword(`/templates/${encodeURIComponent(currentTemplateFilename)}`);
         }
 
         // Initialize Field Manager
@@ -589,7 +608,8 @@ function setupDownloadButton(sessionId) {
                 body: JSON.stringify({
                     fields: isSingleInstance ? allInstances[0].fields : null,
                     instances: isSingleInstance ? null : allInstances,
-                    flatten
+                    flatten,
+                    pdfPassword // Pass the decryption password if we have one
                 })
             });
 
@@ -723,7 +743,8 @@ function setupEmailButton(sessionId) {
                 body: JSON.stringify({
                     fields: isSingleInstance ? allInstances[0].fields : null,
                     instances: isSingleInstance ? null : allInstances,
-                    flatten
+                    flatten,
+                    pdfPassword // Pass the decryption password if we have one
                 })
             });
 

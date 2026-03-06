@@ -7,11 +7,15 @@ const path = require('path');
  * @param {string} pdfPath - Path to original PDF
  * @param {Array} fields - Array of field data with values
  * @param {boolean} flatten - Whether to flatten the PDF
+ * @param {string} [password] - User password if the PDF is protected
  * @returns {Promise<Buffer>} - Generated PDF bytes
  */
-async function generateFilledPDF(pdfPath, fields, flatten = false) {
+async function generateFilledPDF(pdfPath, fields, flatten = false, password = null) {
     const pdfBytes = await fs.readFile(pdfPath);
-    const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+    const pdfDoc = await PDFDocument.load(pdfBytes, { 
+        password: password,
+        ignoreEncryption: !password 
+    });
 
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);

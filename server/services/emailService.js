@@ -340,4 +340,84 @@ async function sendPaymentNotificationToAdmin(paymentData, file) {
     }
 }
 
-module.exports = { sendPdfEmail, sendPaymentNotificationToAdmin };
+/**
+ * Sends a contact form message to the support email.
+ * 
+ * @param {string} name - User's name
+ * @param {string} email - User's email
+ * @param {string} message - User's message
+ * @param {Object} [attachment] - Optional attachment { filename, content (base64) }
+ */
+async function sendContactEmail(name, email, message, attachment = null) {
+    if (!name || !email || !message) throw new Error('Name, email, and message are required');
+
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) throw new Error('BREVO_API_KEY environment variable is not set');
+
+    const fromEmail = process.env.EMAIL_FROM || 'sparshnfc@gmail.com';
+    const fromName = process.env.EMAIL_FROM_NAME || 'Click2PDF Contact Form';
+    const supportEmail = 'info.click2pdf@gmail.com';
+
+    const htmlContent = `
+        <div style="font-family: sans-serif; line-height: 1.6; color: #2d3748; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px; margin-top: 0;">New Contact Form Message</h2>
+            
+            <p style="margin-top: 20px;">You have received a new message from the Click2PDF contact form:</p>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #edf2f7; font-weight: bold; width: 120px;">Name:</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #edf2f7;">${name}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #edf2f7; font-weight: bold;">Email:</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #edf2f7;">
+                        <a href="mailto:${email}" style="color: #00bcd4; text-decoration: none;">${email}</a>
+                    </td>
+                </tr>
+            </table>
+            
+            <div style="background-color: #f7fafc; padding: 20px; border-radius: 6px; border-left: 4px solid #00bcd4;">
+                <h3 style="margin-top: 0; font-size: 16px; color: #4a5568;">Message:</h3>
+                <p style="margin-bottom: 0; white-space: pre-wrap;">${message}</p>
+            </div>
+
+            ${attachment ? `
+            <div style="margin-top: 20px; font-size: 14px; color: #4a5568;">
+                📎 <strong>Attachment:</strong> ${attachment.filename} (attached to this email)
+            </div>
+            ` : ''}
+            
+            <p style="margin-top: 30px; font-size: 12px; color: #a0aec0; text-align: center;">
+                This email was sent automatically from the Click2PDF contact form.
+            </p>
+        </div>
+    `;
+
+    const payload = {
+        sender: { name: fromName, email: fromEmail },
+        to: [{ email: supportEmail }],
+        replyTo: { email: email, name: name },
+        subject: `New Message from ${name} via Contact Form`,
+        htmlContent,
+    };
+
+    if (attachment) {
+        payload.attachment = [attachment];
+    }
+
+    try {
+        const result = await brevoRequest(payload, apiKey);
+        console.log(`Contact form email sent successfully. Message ID: ${result.messageId}`);
+        return { success: true, messageId: result.messageId };
+    } catch (error) {
+        console.error('Error sending contact form email:', error.message);
+        throw new Error(`Failed to send contact form email: ${error.message}`);
+    }
+}
+
+module.exports = { 
+    sendPdfEmail, 
+    sendPaymentNotificationToAdmin,
+    sendContactEmail
+};

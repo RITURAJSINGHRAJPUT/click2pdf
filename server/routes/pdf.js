@@ -5,6 +5,7 @@ const fs = require('fs');
 const upload = require('../middleware/upload');
 const { parsePDF } = require('../services/pdfParser');
 const { generateFilledPDF, saveGeneratedPDF, encryptPdfBuffer } = require('../services/pdfGenerator');
+const { sendPdfEmail, sendContactEmail } = require('../services/emailService');
 const { deleteSessionFiles } = require('../utils/cleanup');
 const { db } = require('../config/firebase');
 
@@ -109,7 +110,7 @@ router.put('/fields/:sessionId', express.json(), (req, res) => {
  */
 router.post('/generate/:sessionId', express.json(), async (req, res) => {
     const { sessionId } = req.params;
-    const { fields, instances, flatten = false } = req.body;
+    const { fields, instances, flatten = false, pdfPassword } = req.body;
     const session = sessions.get(sessionId);
     const userId = req.headers['x-user-id'];
 
@@ -160,7 +161,10 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
 
             // Read template once
             const templateBytes = await fs.promises.readFile(session.pdfPath);
-            const templatePdf = await PDFDocument.load(templateBytes, { ignoreEncryption: true });
+            const templatePdf = await PDFDocument.load(templateBytes, { 
+                password: pdfPassword,
+                ignoreEncryption: !pdfPassword 
+            });
             const templatePageIndices = templatePdf.getPageIndices();
 
             // Embed fonts once
@@ -187,7 +191,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
         } else {
             // Single instance - use fields directly
             const fieldsToUse = fields || (instances && instances[0]?.fields) || session.fields;
-            pdfBuffer = await generateFilledPDF(session.pdfPath, fieldsToUse, flatten);
+            pdfBuffer = await generateFilledPDF(session.pdfPath, fieldsToUse, flatten, pdfPassword);
         }
 
         // Encrypt PDF with auto-generated password
@@ -333,6 +337,42 @@ router.get('/session/:sessionId', (req, res) => {
         pageInfo: session.pdfData.pageInfo,
         fieldCount: session.fields.length
     });
+});
+
+/**
+ * Contact Form Submission
+ * POST /api/contact
+ */
+router.post('/contact', upload.single('screenshot'), async (req, res) => {
+    const { name, email, message } = req.body;
+    const screenshot = req.file;
+
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Name, email, and message are required' });
+    }
+
+    try {
+        let attachment = null;
+        if (screenshot) {
+            const fileContent = await fs.promises.readFile(screenshot.path);
+            attachment = {
+                filename: screenshot.originalname,
+                content: fileContent.toString('base64')
+            };
+        }
+
+        await sendContactEmail(name, email, message, attachment);
+
+        // Clean up uploaded screenshot
+        if (screenshot) {
+            fs.promises.unlink(screenshot.path).catch(err => console.error('Error deleting screenshot:', err));
+        }
+
+        res.json({ success: true, message: 'Message sent successfully' });
+    } catch (error) {
+        console.error('Contact form error:', error);
+        res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+    }
 });
 
 module.exports = router;
