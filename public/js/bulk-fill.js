@@ -85,7 +85,7 @@ async function fetchUserCredits() {
             currentCredits = data.bulkCredits || 0;
             const creditsBadge = document.getElementById('creditsCount');
             if (creditsBadge) {
-                creditsBadge.textContent = currentCredits;
+                creditsBadge.textContent = window.isAdmin ? 'Unlimited' : currentCredits;
                 // Add a little pop animation
                 creditsBadge.parentElement.classList.add('scale-105', 'shadow-md');
                 setTimeout(() => {
@@ -518,7 +518,7 @@ async function startGeneration() {
     }
 
     const requiredCredits = uploadedData.length;
-    if (requiredCredits > currentCredits) {
+    if (!window.isAdmin && requiredCredits > currentCredits) {
         if (modalRequiredCredits) modalRequiredCredits.textContent = requiredCredits;
         if (modalCurrentCredits) modalCurrentCredits.textContent = currentCredits;
         if (creditsModal) {

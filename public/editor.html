@@ -11,7 +11,8 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
         rel="stylesheet" />
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4DD0E1">
@@ -138,6 +139,99 @@
             padding: 0;
             overflow: hidden;
         }
+
+        /* Premium Tooltip & Button Animations */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            background: linear-gradient(135deg, #37474F 0%, #263238 100%);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        /* Tooltip Arrow */
+        [data-tooltip]::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            border: 6px solid transparent;
+            border-bottom-color: #37474F;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            z-index: 101;
+        }
+
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        [data-tooltip]:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) translateY(4px);
+        }
+
+        /* Special handling for rightmost buttons to prevent clipping */
+        .tooltip-right-align[data-tooltip]::after {
+            left: auto;
+            right: 0;
+            transform: translateX(0) translateY(5px);
+        }
+
+        .tooltip-right-align[data-tooltip]::before {
+            left: auto;
+            right: 20px;
+            transform: translateX(0) translateY(0);
+        }
+
+        .tooltip-right-align[data-tooltip]:hover::after {
+            transform: translateX(0) translateY(0);
+        }
+
+        .tooltip-right-align[data-tooltip]:hover::before {
+            transform: translateX(0) translateY(4px);
+        }
+
+        .premium-btn-hover {
+            transition: all 0.3s ease;
+        }
+
+        .premium-btn-hover:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 20px -4px rgba(77, 208, 225, 0.4);
+        }
+
+        #saveTemplateBtn:hover {
+            box-shadow: 0 8px 20px -4px rgba(77, 208, 225, 0.2);
+        }
+
+        #downloadBtn:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 172, 193, 0.5);
+        }
+
+        #downloadCsvBtn:hover {
+            box-shadow: 0 8px 20px -4px rgba(255, 112, 67, 0.3);
+        }
     </style>
 </head>
 
@@ -165,30 +259,41 @@
                 </a>
 
                 <!-- Zoom & Nav Controls -->
-                <div
-                    class="flex items-center justify-center bg-slate-50 rounded-full px-2 sm:px-4 py-1.5 gap-2 sm:gap-4 border border-slate-200 shrink-0 mx-2 sm:mx-0">
-                    <button id="zoomOut"
-                        class="p-1 sm:p-1.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-500 hover:text-vibrant-turquoise">
-                        <span class="material-symbols-outlined text-base sm:text-lg">zoom_out</span>
-                    </button>
-                    <span id="zoomLevel"
-                        class="text-[10px] sm:text-xs font-bold text-slate-600 w-8 sm:w-10 text-center">100%</span>
-                    <button id="zoomIn"
-                        class="p-1 sm:p-1.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-500 hover:text-vibrant-turquoise">
-                        <span class="material-symbols-outlined text-base sm:text-lg">zoom_in</span>
-                    </button>
-                    <div class="h-4 w-px bg-slate-300"></div>
-                    <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-bold text-slate-600">
-                        <button id="prevPage"
-                            class="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-md hover:bg-white"><span
-                                class="material-symbols-outlined text-sm">chevron_left</span></button>
-                        <span class="whitespace-nowrap"><span id="currentPage">1</span> / <span
-                                id="totalPages">1</span></span>
-                        <button id="nextPage"
-                            class="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-md hover:bg-white"><span
-                                class="material-symbols-outlined text-sm">chevron_right</span></button>
+                <div class="flex items-center bg-slate-100/50 rounded-full px-1 py-1 gap-1 border border-slate-200/60 shadow-inner shrink-0 mx-2">
+                    <div class="flex items-center gap-0.5 bg-white rounded-full px-2 py-1 shadow-sm border border-slate-200">
+                        <button id="zoomOut"
+                            class="w-7 h-7 flex items-center justify-center hover:bg-slate-100 rounded-full transition-all text-slate-400 hover:text-vibrant-turquoise"
+                            title="Zoom Out">
+                            <span class="material-symbols-outlined text-lg">zoom_out</span>
+                        </button>
+                        <span id="zoomLevel" class="text-[11px] font-black text-slate-700 w-10 text-center select-none tracking-tighter">100%</span>
+                        <button id="zoomIn"
+                            class="w-7 h-7 flex items-center justify-center hover:bg-slate-100 rounded-full transition-all text-slate-400 hover:text-vibrant-turquoise"
+                            title="Zoom In">
+                            <span class="material-symbols-outlined text-lg">zoom_in</span>
+                        </button>
                     </div>
-                    <!-- Hidden original add page logic target (can be exposed later) -->
+                    
+                    <div class="h-5 w-px bg-slate-200 mx-1"></div>
+                    
+                    <div class="flex items-center gap-1 bg-white rounded-full px-2 py-1 shadow-sm border border-slate-200">
+                        <button id="prevPage"
+                            class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-vibrant-turquoise transition-all"
+                            title="Previous Page">
+                            <span class="material-symbols-outlined text-lg">chevron_left</span>
+                        </button>
+                        <div class="flex items-center gap-1 text-[11px] font-black text-slate-700 select-none min-w-[32px] justify-center tracking-tighter">
+                            <span id="currentPage">1</span>
+                            <span class="text-slate-300">/</span>
+                            <span id="totalPages">1</span>
+                        </div>
+                        <button id="nextPage"
+                            class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-vibrant-turquoise transition-all"
+                            title="Next Page">
+                            <span class="material-symbols-outlined text-lg">chevron_right</span>
+                        </button>
+                    </div>
+                    <!-- Hidden original add page logic target -->
                     <button id="addPageBtn" class="hidden"></button>
                 </div>
             </div>
@@ -202,26 +307,26 @@
                 </div>
 
                 <button onclick="window.history.back()"
-                    class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-vibrant-coral transition-colors"
+                    class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 text-slate-500 hover:text-vibrant-coral transition-colors"
                     title="Go Back">
                     <span class="material-symbols-outlined text-xl">close</span>
                 </button>
 
-                <button id="saveTemplateBtn"
-                    class="bg-white border-2 border-slate-200 text-slate-600 px-4 py-1.5 md:py-2 rounded-full font-bold hover:border-vibrant-turquoise hover:text-vibrant-turquoise transition-all flex items-center gap-2 text-sm">
+                <button id="saveTemplateBtn" data-tooltip="Save template for bulk fill"
+                    class="premium-btn-hover h-10 w-28 md:w-40 bg-white border-2 border-slate-200 text-slate-600 rounded-full font-bold hover:border-vibrant-turquoise hover:text-vibrant-turquoise transition-all flex items-center justify-center gap-2 text-sm">
                     <span class="material-symbols-outlined hidden md:block text-lg">save</span> Save <span
                         class="hidden md:inline">Template</span>
                 </button>
 
-                <button id="downloadBtn"
-                    class="bg-vibrant-turquoise text-white px-4 py-1.5 md:py-2 rounded-full font-bold shadow-[0_4px_0_0_#00ACC1] hover:translate-y-0.5 hover:shadow-[0_2px_0_0_#00ACC1] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2 text-sm">
+                <button id="downloadBtn" data-tooltip="Download PDF"
+                    class="premium-btn-hover h-10 w-28 md:w-40 bg-vibrant-turquoise text-white border-2 border-vibrant-turquoise rounded-full font-bold hover:bg-[#00ACC1] hover:border-[#00ACC1] transition-all flex items-center justify-center gap-2 text-sm">
                     <span class="material-symbols-outlined hidden md:block text-lg">download</span> Download <span
                         class="hidden md:inline">PDF</span>
                 </button>
                 <button id="downloadCsvBtn" style="display: none;"
-                    class="bg-soft-coral text-vibrant-coral px-4 md:px-6 py-2 md:py-2.5 rounded-full font-bold border-2 border-soft-coral hover:bg-vibrant-coral hover:text-white transition-all flex items-center gap-2 text-sm md:text-base">
-                    <span class="material-symbols-outlined hidden md:block">table_chart</span> Bulk <span
-                        class="hidden md:inline">CSV</span>
+                    data-tooltip="Download saved template CSV for creating bulk fill"
+                    class="premium-btn-hover tooltip-right-align h-10 w-28 md:w-40 bg-soft-coral text-vibrant-coral rounded-full font-bold border-2 border-soft-coral hover:bg-vibrant-coral hover:text-white transition-all flex items-center justify-center gap-2 text-sm">
+                    <span class="material-symbols-outlined hidden md:block text-lg">table_chart</span> Bulk CSV
                 </button>
             </div>
         </header>
@@ -293,8 +398,7 @@
                 </div>
                 <!-- Magic Tip Footer -->
                 <div class="hidden md:block p-6 border-t-2 border-slate-100 bg-slate-50/50">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="material-symbols-outlined text-vibrant-coral">auto_awesome</span>
+                    <div class="mb-2">
                         <span class="font-bold text-sm text-slate-700">Magic Tip</span>
                     </div>
                     <p class="text-xs text-slate-500 leading-relaxed">Drag fields anywhere on the document. We'll snap
@@ -435,11 +539,13 @@
                     <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
                 </div>
 
-                <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70">
-                    <a class="hover:text-vibrant-coral transition-colors" href="#">Privacy Bits</a>
-                    <a class="hover:text-vibrant-coral transition-colors" href="#">House Rules</a>
-                    <a class="hover:text-vibrant-coral transition-colors" href="#">Say Hello!</a>
-                    <a class="hover:text-vibrant-coral transition-colors" href="#">Twitter (X)</a>
+                <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+                    <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+                    <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+                    <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+                    <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+                    <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
+                    <a class="hover:text-vibrant-coral transition-colors" href="/help.html">Help</a>
                 </div>
 
                 <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">

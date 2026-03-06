@@ -491,9 +491,12 @@ function updateAuthUI(
     if (userData && typeof userData.bulkCredits !== "undefined") {
       credits = userData.bulkCredits;
     }
-    creditCounter.textContent = `${credits} left`;
+    creditCounter.textContent = isAdminUser ? "Unlimited" : `${credits} left`;
     creditCounter.classList.remove("hidden");
   }
+
+  // Set global admin flag
+  window.isAdmin = isAdminUser;
 
   // Add Admin Panel link and show restricted features if user is admin
   if (isAdminUser) {
