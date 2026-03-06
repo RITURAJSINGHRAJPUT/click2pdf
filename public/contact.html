@@ -159,7 +159,7 @@
                         <div>
                             <h3 class="font-black text-friendly-navy/90">Email Us</h3>
                             <a href="mailto:support@click2pdf.in"
-                                class="font-bold text-vibrant-turquoise hover:text-vibrant-coral transition-colors">support@click2pdf.in</a>
+                                class="font-bold text-vibrant-turquoise hover:text-vibrant-coral transition-colors">info.click2pdf@gmail.com</a>
                         </div>
                     </div>
                 </div>
@@ -189,6 +189,42 @@
                             class="w-full bg-white/80 border-2 border-transparent focus:border-vibrant-turquoise rounded-xl px-4 py-3 font-bold text-friendly-navy placeholder-friendly-navy/30 transition-colors shadow-inner resize-none"></textarea>
                     </div>
 
+                    <!-- Screenshot Upload -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-bold text-sm text-friendly-navy/70 ml-2">Attach Screenshot (Optional)</label>
+                        <div id="uploadContainer" 
+                            class="relative border-2 border-dashed border-slate-200 hover:border-vibrant-turquoise bg-slate-50/50 rounded-xl p-4 transition-all group cursor-pointer">
+                            <input type="file" id="screenshot" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                            
+                            <!-- Empty State -->
+                            <div id="uploadEmpty" class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-soft-turquoise/30 text-vibrant-turquoise flex items-center justify-center shrink-0 group-hover:bg-vibrant-turquoise group-hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined">add_photo_alternate</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-600">Click or Drag Image</p>
+                                    <p class="text-[10px] text-slate-400 font-medium">PNG, JPG up to 5MB</p>
+                                </div>
+                            </div>
+
+                            <!-- Preview State -->
+                            <div id="uploadPreview" class="hidden flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="w-12 h-12 rounded-lg bg-white border border-slate-200 overflow-hidden shrink-0">
+                                        <img id="screenshotPreviewImg" src="" alt="Preview" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <p id="screenshotFilename" class="text-xs font-bold text-slate-600 truncate max-w-[150px]">filename.png</p>
+                                        <p id="screenshotFilesize" class="text-[10px] text-slate-400 font-medium">1.2 MB</p>
+                                    </div>
+                                </div>
+                                <button type="button" id="removeScreenshot" class="w-8 h-8 rounded-full bg-soft-coral/20 text-vibrant-coral hover:bg-vibrant-coral hover:text-white transition-colors flex items-center justify-center relative z-20">
+                                    <span class="material-symbols-outlined text-sm">close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <button type="submit"
                         class="mt-2 w-full bg-vibrant-turquoise text-white font-black text-lg py-3.5 rounded-xl button-tactile flex items-center justify-center gap-2 group hover:bg-[#00acc1]">
                         <span>Send Message</span>
@@ -212,11 +248,12 @@
                 <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
             </div>
 
-            <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70">
-                <a class="hover:text-vibrant-coral transition-colors" href="/privacy.html">Privacy Bits</a>
-                <a class="hover:text-vibrant-coral transition-colors" href="/terms.html">House Rules</a>
-                <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Say Hello!</a>
-                <a class="hover:text-vibrant-coral transition-colors" href="#">Twitter (X)</a>
+            <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+                <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
             </div>
 
             <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">
@@ -235,18 +272,95 @@
     <script>
         const form = document.getElementById('contactForm');
         const toast = document.getElementById('toast');
+        const screenshotInput = document.getElementById('screenshot');
+        const uploadEmpty = document.getElementById('uploadEmpty');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const previewImg = document.getElementById('screenshotPreviewImg');
+        const filenameLabel = document.getElementById('screenshotFilename');
+        const filesizeLabel = document.getElementById('screenshotFilesize');
+        const removeBtn = document.getElementById('removeScreenshot');
 
-        form.addEventListener('submit', (e) => {
+        // Handle File Selection Preview
+        screenshotInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File is too large! Please select an image under 5MB.');
+                    screenshotInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    filenameLabel.textContent = file.name;
+                    filesizeLabel.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                    uploadEmpty.classList.add('hidden');
+                    uploadPreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Remove Screenshot
+        removeBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            screenshotInput.value = '';
+            uploadEmpty.classList.remove('hidden');
+            uploadPreview.classList.add('hidden');
+        });
 
-            // Show toast
-            toast.classList.add('show');
-            form.reset();
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Sending...</span><span class="material-symbols-outlined animate-spin">sync</span>';
 
-            // Hide toast after 4 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('message', document.getElementById('message').value);
+            
+            if (screenshotInput.files[0]) {
+                formData.append('screenshot', screenshotInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    body: formData // No Content-Type header needed for FormData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    toast.textContent = "Message sent! We'll get back to you soon.";
+                    toast.style.borderLeftColor = "#00BCD4";
+                    toast.classList.add('show');
+                    form.reset();
+                    uploadEmpty.classList.remove('hidden');
+                    uploadPreview.classList.add('hidden');
+                } else {
+                    throw new Error(result.error || 'Failed to send message');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                toast.textContent = error.message || "Something went wrong. Please try again.";
+                toast.style.borderLeftColor = "#FF5722";
+                toast.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                
+                // Hide toast after 4 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            }
         });
 
         if ('serviceWorker' in navigator) {

@@ -19,12 +19,13 @@ class PDFViewer {
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
-    /**
-     * Load PDF from URL
-     */
-    async loadPDF(url) {
+    async loadPDF(url, password = null) {
         try {
-            const loadingTask = pdfjsLib.getDocument(url);
+            const loadingTask = pdfjsLib.getDocument({
+                url: url,
+                password: password
+            });
+
             this.pdfDoc = await loadingTask.promise;
             this.totalPages = this.pdfDoc.numPages;
 
@@ -48,6 +49,9 @@ class PDFViewer {
                 pageInfo: this.pageInfo
             };
         } catch (error) {
+            if (error.name === 'PasswordException') {
+                throw { name: 'PasswordException', message: error.message, code: error.code };
+            }
             console.error('Error loading PDF:', error);
             throw error;
         }
