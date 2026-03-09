@@ -1,0 +1,52 @@
+# Landing Page Redesign — Click2PDF
+
+Redesign the [index.html](file:///e:/project/click2pdf/public/index.html) landing page from its current cartoon/playful style into a **modern, professional, high-conversion SaaS landing page** with premium aesthetics, smooth animations, and clear value propositions.
+
+## Design Direction
+
+- **Dark-to-light gradient hero** with glassmorphism elements
+- **Inter** font (clean, modern SaaS standard) replacing Quicksand
+- Refined color palette: deep navy `#0f172a`, electric blue `#3b82f6`, vibrant violet `#8b5cf6`, fresh teal `#06b6d4`
+- Subtle micro-animations (fade-in on scroll, floating elements, gradient text)
+- Professional copy that communicates trust and capability
+- Still uses **Tailwind CDN** (matching current stack) — no build step change
+
+## Proposed Changes
+
+### Landing Page
+
+#### [MODIFY] [index.html](file:///e:/project/click2pdf/public/index.html)
+
+Complete rewrite of the HTML body while preserving:
+- All SEO meta tags, structured data, and OpenGraph tags
+- Auth module import ([js/auth.js](file:///e:/project/click2pdf/public/js/auth.js)) and service worker registration
+- Pricing modal content & logic
+- Footer links (Privacy, Returns, Refunds, Disclaimer, Contact, Help)
+
+**New sections (top to bottom):**
+
+1. **Navbar** — Sticky glass-effect navbar with logo, nav links (Features, How It Works, Pricing), and "Get Started" CTA button
+2. **Hero** — Full-width gradient background, large headline with gradient text, animated subtext, dual CTAs ("Start Free" + "See How It Works"), floating decorative shapes, and a subtle animated demo mockup area
+3. **Trusted By / Social Proof** — Stats bar showing key metrics (e.g., "10,000+ PDFs Processed", "99.9% Uptime", "100% Secure")
+4. **Features Grid** — 6 feature cards with icons, titles, and descriptions showcasing: Form Filling, Bulk Fill, PDF Merge, PDF Split, PDF Conversion, Security
+5. **How It Works** — Redesigned 3-step process with numbered cards, connector lines, and clean icons (Upload → Edit → Download)
+6. **Security / Trust** — Modern trust section with glassmorphism card, shield icon, encryption & auto-delete badges
+7. **Pricing Section** (inline, not just modal) — Clean 3-column pricing cards visible on the page, with the existing modal as a backup
+8. **Final CTA** — Gradient CTA banner with compelling headline
+9. **Footer** — Modern multi-column footer with logo, links, and copyright
+
+**Technical details:**
+- CSS-only scroll-reveal animations using `IntersectionObserver`
+- Gradient text via `background-clip: text`
+- Glassmorphism via `backdrop-filter: blur()` + semi-transparent backgrounds
+- Responsive: fully mobile-optimized with proper spacing
+
+## Verification Plan
+
+### Manual Verification
+1. Open [index.html](file:///e:/project/click2pdf/public/index.html) in a browser via the dev server and visually verify:
+   - All sections render correctly on desktop and mobile widths
+   - Animations trigger on scroll
+   - All links work (Get Started → [/login.html](file:///e:/project/click2pdf/public/login.html), Pricing modal opens, footer links)
+   - Auth redirect still works (logged-in users redirected to [/app.html](file:///e:/project/click2pdf/public/app.html))
+2. Check mobile responsiveness by resizing the browser window
