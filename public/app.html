@@ -203,7 +203,7 @@
                 <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF"
                     class="w-full h-full object-cover rounded-lg">
             </div>
-            <span class="hidden sm:block font-bold text-xl tracking-tight text-vibrant-turquoise">Click2PDF</span>
+            <span class="font-bold text-lg sm:text-xl tracking-tight text-vibrant-turquoise">Click2PDF</span>
         </a>
         <div class="flex items-center gap-2 sm:gap-4 justify-end">
             <a href="/Buy-Credits.html"
@@ -218,7 +218,7 @@
                 <button id="profileMenuBtn"
                     class="font-bold flex items-center gap-1.5 bg-white border-2 border-slate-100 hover:border-vibrant-turquoise shadow-[2px_2px_0px_0px_#e2e8f0] px-2.5 py-1.5 sm:px-3 md:px-3 lg:py-1.5 rounded-xl text-slate-600 hover:text-vibrant-turquoise hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#4DD0E1] transition-all text-xs sm:text-sm">
                     <span class="material-symbols-outlined text-[16px] sm:text-[18px]">account_circle</span>
-                    <span class="whitespace-nowrap login-text hidden sm:inline">Profile</span>
+                    <span id="navUserName" class="whitespace-nowrap login-text hidden sm:inline">Profile</span>
                     <span
                         class="material-symbols-outlined text-[16px] transition-transform group-hover:rotate-180">expand_more</span>
                 </button>
@@ -546,7 +546,13 @@
                         const d = snap.data();
                         const seedName = encodeURIComponent(d.fullName || user.email || 'user');
                         els.initials.innerHTML = `<img src="https://api.dicebear.com/7.x/notionists/svg?seed=${seedName}&backgroundColor=b2ebf2" alt="Profile" class="w-full h-full object-cover">`;
-                        els.displayName.textContent = d.fullName || user.email.split('@')[0];
+                        
+                        const actualName = d.fullName || user.email.split('@')[0];
+                        els.displayName.textContent = actualName;
+                        
+                        // Update Navbar Name
+                        const navUserName = document.getElementById('navUserName');
+                        if (navUserName) navUserName.textContent = actualName;
 
                         let joinText = 'Member since recently';
                         if (d.createdAt) {
@@ -572,6 +578,10 @@
                         els.inputEmail.value = user.email;
                         const fallbackSeed = encodeURIComponent(user.email || 'user');
                         els.initials.innerHTML = `<img src="https://api.dicebear.com/7.x/notionists/svg?seed=${fallbackSeed}&backgroundColor=b2ebf2" alt="Profile" class="w-full h-full object-cover">`;
+                        
+                        // Fallback for navbar name
+                        const navUserName = document.getElementById('navUserName');
+                        if (navUserName) navUserName.textContent = user.email.split('@')[0];
                     }
                     profileLoaded = true;
                 } catch (err) {

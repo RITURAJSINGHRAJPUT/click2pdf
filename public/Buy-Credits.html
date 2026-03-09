@@ -149,7 +149,7 @@
     <!-- Main Content -->
     <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-8 relative mt-10 md:mt-2 gap-8 w-full">
         <!-- Back Button -->
-        <div class="w-full max-w-[1000px] mx-auto flex justify-start -mb-4 relative z-10">
+        <div id="mainBackButton" class="w-full max-w-[1000px] mx-auto flex justify-start -mb-4 relative z-10 transition-opacity">
             <button onclick="window.history.back()"
                 class="flex items-center gap-1.5 bg-white border-2 border-slate-100 hover:border-vibrant-turquoise shadow-[2px_2px_0px_0px_#e2e8f0] px-3 py-1.5 rounded-xl text-slate-600 hover:text-vibrant-turquoise hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#4DD0E1] transition-all text-sm font-bold w-max">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -640,6 +640,9 @@
             paymentSection.classList.remove('hidden');
             paymentSection.classList.add('section-fade-in');
 
+            // Hide the global back button to avoid confusion
+            document.getElementById('mainBackButton').classList.add('hidden');
+
             // Update dynamic product info
             document.getElementById('selectedProductName').textContent = productName;
             document.getElementById('selectedProductAmount').textContent = amount;
@@ -654,6 +657,9 @@
             const pricingSection = document.getElementById('pricingSection');
             pricingSection.classList.remove('hidden');
             pricingSection.classList.add('section-fade-in');
+
+            // Show global back button again
+            document.getElementById('mainBackButton').classList.remove('hidden');
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
