@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon_io/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>User Profile - Click2PDF</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+        rel="stylesheet" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4DD0E1">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-turquoise': '#E0F7FA',
+                        'vibrant-turquoise': '#4DD0E1',
+                        'soft-coral': '#FFAB91',
+                        'vibrant-coral': '#FF7043',
+                        'sunny-yellow': '#FFF59D',
+                        'warm-yellow': '#FBC02D',
+                        'friendly-gray': '#546E7A',
+                        'friendly-navy': '#37474F',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'blob': '30% 70% 70% 30% / 30% 30% 70% 70%',
+                        'super-rounded': '2.5rem',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            background-color: #FCFDFF;
+            color: #546E7A;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+
+        .hand-drawn-border {
+            border: 3px solid currentColor;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+
+        /* Profile card dynamic styling */
+        .profile-card {
+            background-color: white;
+            border-radius: 2.5rem;
+            border: 2px solid #E0F7FA;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(77, 208, 225, 0.2);
+            border-top-color: #4DD0E1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased h-screen flex flex-col">
+    <!-- Auth Check -->
+    <script type="module">
+        import { checkAuth } from './js/auth.js';
+        checkAuth(true); // Redirect to login if not authenticated
+    </script>
+
+    <!-- Navigation -->
+    <nav
+        class="py-3 px-4 sm:px-8 max-w-7xl mx-auto w-full flex justify-between items-center relative z-20 border-b border-friendly-navy/10">
+        <a href="/app.html" class="flex items-center gap-3 group transition-transform hover:-translate-x-1">
+            <div
+                class="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl rotate-3 shadow-sm group-hover:-rotate-3 transition-all">
+                <span class="material-symbols-outlined text-white text-2xl">arrow_back</span>
+            </div>
+            <span class="font-bold text-xl tracking-tight text-vibrant-turquoise hidden sm:inline">Back to
+                Dashboard</span>
+        </a>
+        <div class="flex items-center gap-4 sm:gap-6">
+            <a href="#" id="loginBtn"
+                class="font-bold flex items-center gap-1.5 bg-white border-2 border-slate-100 hover:border-vibrant-coral shadow-[2px_2px_0px_0px_#e2e8f0] px-4 py-2 rounded-xl text-slate-600 hover:text-vibrant-coral hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#FF7043] transition-all">
+                Loading...
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
+        <!-- Playful Background Blobs -->
+        <div
+            class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-soft-turquoise rounded-full opacity-50 -z-10 blur-3xl">
+        </div>
+        <div class="absolute bottom-10 left-10 w-48 h-48 bg-soft-coral rounded-full opacity-20 -z-10 blur-3xl"></div>
+
+        <div class="w-full max-w-md relative z-10">
+            <div class="bg-white rounded-[2.5rem] p-0 relative shadow-2xl border border-white overflow-hidden pb-2">
+                <!-- Header Gradient -->
+                <div class="h-32 bg-gradient-to-r from-warm-yellow via-soft-turquoise to-vibrant-turquoise relative">
+                </div>
+
+                <!-- Profile Content -->
+                <div class="px-6 pb-6 -mt-16 relative z-10 w-full flex flex-col items-center">
+                    <!-- Avatar & Badge -->
+                    <div class="mb-3 relative inline-block">
+                        <div class="w-24 h-24 bg-soft-turquoise text-white rounded-full flex items-center justify-center border-[5px] border-white shadow-sm overflow-hidden p-0"
+                            id="profileInitials">
+                            <img src="https://api.dicebear.com/7.x/notionists/svg?seed=user&backgroundColor=b2ebf2"
+                                alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-vibrant-coral text-white px-3 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full shadow-md whitespace-nowrap z-10"
+                            id="roleBadge">
+                            POWER FILL
+                        </div>
+                    </div>
+
+                    <!-- Main Info -->
+                    <h1 class="text-[22px] font-extrabold text-friendly-navy mt-1 text-center" id="displayEmail">
+                        Loading...</h1>
+                    <p class="text-slate-500 font-semibold text-[11px] mb-6 text-center" id="displayJoinDate">Member
+                        since...</p>
+
+                    <!-- Profile Form -->
+                    <form id="profileForm" class="w-full space-y-4">
+                        <div class="flex items-center gap-2 px-1 mb-1">
+                            <span class="material-symbols-outlined text-[#5C6BC0] text-[18px]">person</span>
+                            <h3 class="text-[13px] font-extrabold text-[#5C6BC0]">Personal Details</h3>
+                        </div>
+
+                        <div class="bg-[#F4F7FA] p-5 rounded-[1.5rem] border border-slate-100">
+                            <div class="space-y-4">
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-black text-[#6B7AE1] mb-1.5 uppercase tracking-widest ml-1">Full
+                                        Name</label>
+                                    <input type="text" id="inputName" placeholder="E.g. Jane Doe"
+                                        class="w-full bg-white border border-slate-200 outline-none text-[#5C6BC0] font-bold px-4 py-2.5 rounded-xl focus:border-[#5C6BC0] focus:ring-2 focus:ring-[#5C6BC0]/20 transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-sm placeholder-[#9EADCE]">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label
+                                            class="block text-[9px] font-black text-[#6B7AE1] mb-1.5 uppercase tracking-widest ml-1">Email</label>
+                                        <input type="email" id="inputEmail" disabled
+                                            class="w-full bg-slate-50/80 border border-slate-200 outline-none text-slate-400 font-bold px-3 py-2.5 rounded-xl cursor-not-allowed shadow-inner text-[11px]">
+                                        <p class="text-[8px] text-slate-400 mt-1 ml-1">Email cannot be changed directly.
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <label
+                                            class="block text-[9px] font-black text-[#6B7AE1] mb-1.5 uppercase tracking-widest ml-1">Company</label>
+                                        <input type="text" id="inputCompany" placeholder="Optional"
+                                            class="w-full bg-white border border-slate-200 outline-none text-[#5C6BC0] font-bold px-3 py-2.5 rounded-xl focus:border-[#5C6BC0] focus:ring-2 focus:ring-[#5C6BC0]/20 transition-all shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-[11px] placeholder-[#9EADCE]">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-2">
+                            <button type="submit" id="saveProfileBtn"
+                                class="w-full bg-vibrant-coral hover:bg-[#F4511E] text-white font-extrabold py-3.5 px-6 rounded-full shadow-[0_8px_20px_rgba(255,87,34,0.3)] hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(255,87,34,0.4)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]" id="saveIcon">save</span>
+                                <span id="saveText">Save Profile</span>
+                                <div id="saveSpinner" class="spinner w-5 h-5 border-2 hidden"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Bottom decorative line -->
+                <div
+                    class="h-1.5 bg-gradient-to-r from-warm-yellow via-soft-turquoise to-vibrant-turquoise w-full absolute bottom-0 left-0">
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Global App Footer -->
+    <footer class="bg-[#e3eaef] py-4 px-4 md:px-6 border-t border-friendly-navy/10 mt-auto shrink-0 w-full z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div
+                    class="w-6 h-6 flex items-center justify-center rounded-lg shadow-sm group-hover:rotate-6 transition-transform">
+                    <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF"
+                        class="w-full h-full object-cover rounded-lg">
+                </div>
+                <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+                 <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/help.html">Help</a>
+            </div>
+
+            <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">
+                <p>© 2026. Sparsh Digital Solutions.</p>
+                <div class="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded-full shadow-sm">
+                    <div class="w-2 h-2 bg-vibrant-turquoise rounded-full animate-[pulse_2s_ease-in-out_infinite]">
+                    </div>
+                    <span>Servers Happy</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container fixed bottom-4 right-4 z-50 flex flex-col gap-2" id="toastContainer"></div>
+
+    <script type="module" src="js/profile.js"></script>
+</body>
+
+</html>

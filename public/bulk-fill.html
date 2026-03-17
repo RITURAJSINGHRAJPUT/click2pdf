@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon_io/favicon.ico">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Bulk Fill PDFs | Click2PDF</title>
+
+    <!-- External Scripts and Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+        rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Meta and Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4DD0E1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/apple-touch-icon.png">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-turquoise': '#E0F7FA',
+                        'vibrant-turquoise': '#4DD0E1',
+                        'soft-coral': '#FFAB91',
+                        'vibrant-coral': '#FF7043',
+                        'sunny-yellow': '#FFF59D',
+                        'warm-yellow': '#FBC02D',
+                        'friendly-gray': '#546E7A',
+                        'friendly-navy': '#37474F',
+                        'pastel-yellow-bg': '#FFFDE7',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'super-rounded': '2.5rem',
+                        'glass': '2rem',
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        body {
+            background-color: #FFFDE7;
+            color: #546E7A;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .step-bubble {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #cbd5e1;
+        }
+
+        /* Functional States */
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 1000;
+            display: none;
+            font-weight: 700;
+            color: #475569;
+            transform: translateY(100%);
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.error {
+            border-color: #FF7043;
+            background: #FFF3E0;
+            color: #d84315;
+        }
+
+        .toast.success {
+            border-color: #4DD0E1;
+            background: #E0F7FA;
+            color: #00838F;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Drag & Drop States */
+        .dragover {
+            background-color: rgba(255, 171, 145, 0.3);
+            border-color: #FF7043;
+        }
+
+        .has-file {
+            background-color: rgba(224, 247, 250, 0.3);
+            border-color: #4DD0E1;
+        }
+
+        /* Data Preview Table */
+        .data-preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin-top: 12px;
+        }
+
+        .data-preview-table th,
+        .data-preview-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .data-preview-table th {
+            color: #94a3b8;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .data-preview-table td {
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .data-preview-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col">
+    <!-- Header -->
+    <header
+        class="bg-white/80 backdrop-blur-md border-b-2 border-slate-100 px-8 py-2 flex items-center justify-between sticky top-0 z-50">
+        <a href="/" class="flex items-center gap-3 group cursor-pointer hover:opacity-90">
+            <div
+                class="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl rotate-3 shadow-lg group-hover:rotate-12 transition-transform">
+                <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF"
+                    class="w-full h-full object-cover rounded-lg">
+            </div>
+            <span
+                class="font-bold text-2xl tracking-tight text-vibrant-turquoise hover:text-vibrant-coral transition-colors">Click2PDF</span>
+        </a>
+        <div class="flex items-center gap-4">
+            <div id="creditsBadgeContainer"
+                class="hidden sm:flex bg-white border-2 border-vibrant-turquoise rounded-xl px-4 py-1.5 shadow-sm font-bold text-slate-700 items-center justify-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-warm-yellow text-lg">toll</span>
+                Credits: <span id="creditsCount" class="text-vibrant-turquoise ml-1 font-black">...</span>
+            </div>
+            <a href="/app.html"
+                class="text-slate-500 font-bold hover:text-vibrant-coral transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined">arrow_back</span> Back to Editor
+            </a>
+            <div class="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+            <a href="/help.html"
+                class="hidden sm:flex bg-vibrant-coral text-white px-5 py-2 rounded-full font-bold shadow-[0_4px_0_0_#D84315] hover:translate-y-0.5 hover:shadow-[0_2px_0_0_#D84315] active:translate-y-1 active:shadow-none transition-all items-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-lg">help</span> Help
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-12">
+        <div class="text-center mb-16 relative">
+
+            <h1 class="text-5xl font-black text-slate-800 mb-4 mt-12 md:mt-0">
+                Vibrant <span
+                    class="text-vibrant-turquoise underline decoration-vibrant-coral decoration-8 underline-offset-8">Bulk
+                    Fill</span> Workflow
+            </h1>
+            <p class="text-slate-600 text-lg font-medium">Auto-fill multiple PDFs from your data in seconds! 🌈✨</p>
+        </div>
+
+        <div class="space-y-8 relative">
+            <!-- Connecting Line -->
+            <div class="absolute left-[24px] top-12 bottom-12 w-1 bg-white/50 -z-10 rounded-full hidden md:block"></div>
+
+            <!-- Step 1: Select Template -->
+            <div class="glass-card p-8 rounded-glass flex flex-col md:flex-row items-start gap-6" id="step1">
+                <div class="step-bubble bg-vibrant-turquoise">1</div>
+                <div class="flex-1 w-full min-w-0">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Select Template</h3>
+                    <div class="relative group">
+                        <select id="templateSelect"
+                            class="w-full bg-white border-4 border-soft-turquoise rounded-3xl p-5 pr-12 text-lg font-bold text-slate-700 focus:border-vibrant-turquoise focus:ring-0 transition-all cursor-pointer">
+                            <option value="">-- Select a template --</option>
+                        </select>
+                    </div>
+                    <p id="templateInfo" class="mt-3 text-sm text-slate-500 font-medium ml-2">Choose a template with
+                        saved field definitions</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Upload Data -->
+            <div class="glass-card p-8 rounded-glass flex flex-col md:flex-row items-start gap-6 border-l-8 border-vibrant-coral disabled"
+                id="step2">
+                <div class="step-bubble bg-vibrant-coral">2</div>
+                <div class="flex-1 w-full min-w-0">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Upload Data (CSV or JSON)</h3>
+
+                    <div id="dataUploadZone"
+                        class="border-4 border-dashed border-soft-coral bg-white/50 rounded-3xl p-12 flex flex-col items-center justify-center gap-4 group cursor-pointer hover:bg-soft-coral/20 transition-all">
+                        <div
+                            class="w-24 h-24 bg-soft-coral rounded-[2rem] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-5xl text-white">cloud_upload</span>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xl font-bold text-slate-700">Drop your CSV or JSON here!</p>
+                            <p class="text-slate-500 font-medium">or click to browse your computer</p>
+                        </div>
+                        <input type="file" id="dataFileInput" accept=".csv,.json" class="hidden">
+                    </div>
+
+                    <!-- File Preview Details -->
+                    <div id="filePreview" class="hidden mt-6 bg-white/60 p-6 rounded-2xl border-2 border-white">
+                        <div class="flex justify-between items-center mb-4 border-b-2 border-slate-100 pb-2">
+                            <span id="fileName" class="font-black text-vibrant-turquoise text-lg truncate"></span>
+                            <span id="rowCount"
+                                class="font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full text-sm"></span>
+                        </div>
+                        <div class="data-preview-scroll custom-scrollbar">
+                            <table id="dataPreviewTable" class="data-preview-table">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 3: Map Fields -->
+            <div class="glass-card p-8 rounded-glass flex flex-col md:flex-row items-start gap-6 border-l-8 border-warm-yellow disabled"
+                id="step3">
+                <div class="step-bubble bg-warm-yellow">3</div>
+                <div class="flex-1 w-full min-w-0">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Map Fields</h3>
+                    <div class="bg-white/40 border-2 border-slate-100 rounded-2xl p-6">
+                        <div
+                            class="flex justify-between items-center text-xs font-black text-slate-400 uppercase tracking-widest mb-4 px-2">
+                            <span>Data Column</span>
+                            <span class="hidden md:inline"></span>
+                            <span>PDF Field</span>
+                        </div>
+                        <div id="mappingRows" class="space-y-3">
+                            <!-- Mapping Rows injected here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Preview -->
+            <div class="glass-card p-8 rounded-glass flex flex-col md:flex-row items-start gap-6 border-l-8 border-slate-800 disabled"
+                id="step4">
+                <div class="step-bubble bg-slate-800">4</div>
+                <div class="flex-1 w-full min-w-0">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Preview First Record</h3>
+
+                    <button id="previewBtn"
+                        class="w-full md:w-auto bg-white border-4 border-slate-800 text-slate-800 px-8 py-4 rounded-3xl font-black text-lg hover:bg-slate-800 hover:text-white transition-all flex items-center justify-center gap-3 shadow-md hover:shadow-xl">
+                        <span class="material-symbols-outlined">visibility</span>
+                        Generate Preview
+                    </button>
+                    <p class="mt-3 text-sm text-slate-500 font-medium ml-2 italic">Make sure everything aligns perfectly
+                        before the big run!</p>
+
+                    <div id="previewPanel" class="hidden mt-6 bg-white p-2 rounded-2xl border-4 border-slate-100">
+                        <iframe id="previewFrame" class="w-full h-[500px] rounded-xl bg-slate-50"></iframe>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 5: Generate -->
+            <div class="glass-card p-10 rounded-glass flex flex-col md:flex-row items-start gap-6 bg-vibrant-turquoise/10 border-vibrant-turquoise border-2 disabled"
+                id="step5">
+                <div class="step-bubble bg-vibrant-turquoise">5</div>
+                <div class="flex-1 w-full min-w-0">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Generate & Download</h3>
+
+                    <!-- Progress Container -->
+                    <div id="progressContainer"
+                        class="hidden mb-8 bg-white p-6 rounded-2xl border-2 border-soft-turquoise">
+                        <div class="h-6 bg-slate-100 rounded-full overflow-hidden mb-3">
+                            <div id="progressBar"
+                                class="h-full bg-vibrant-turquoise flex items-center justify-center text-xs font-black text-white transition-all duration-300"
+                                style="width: 0%">0%</div>
+                        </div>
+                        <p id="progressStatus" class="font-bold text-slate-500 text-center">Preparing magic...</p>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row items-center gap-6" id="actionBar">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="mergeCheckbox"
+                                class="w-8 h-8 rounded-lg border-4 border-slate-300 text-vibrant-turquoise focus:ring-vibrant-turquoise focus:ring-offset-0 cursor-pointer transition-all hover:border-vibrant-turquoise checked:border-vibrant-turquoise">
+                            <span
+                                class="font-bold text-slate-700 select-none group-hover:text-vibrant-turquoise transition-colors">Merge
+                                into single PDF</span>
+                        </label>
+
+                        <button id="generateBtn"
+                            class="flex-1 w-full bg-vibrant-turquoise text-white px-6 py-1.5 rounded-xl font-bold text-base shadow-[0_4px_0_0_#00ACC1] hover:translate-y-1 hover:shadow-[0_2px_0_0_#00ACC1] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="material-symbols-outlined text-xl">rocket_launch</span>
+                            Generate All PDFs
+                        </button>
+
+                        <button id="downloadBtn"
+                            class="hidden flex-1 w-full bg-vibrant-coral text-white px-6 py-1.5 rounded-xl font-bold text-base shadow-[0_4px_0_0_#D84315] hover:translate-y-1 hover:shadow-[0_2px_0_0_#D84315] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-xl">download</span>
+                            Download PDFs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-16 text-center">
+            <div
+                class="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-slate-100 shadow-sm">
+                <p class="text-sm font-bold text-slate-600">Pro Tip: Large datasets might take a minute to sprinkle the
+                    magic! ✨</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Style Footer -->
+    <!-- Global App Footer -->
+    <footer class="bg-[#e3eaef] py-4 px-4 md:px-6 border-t border-friendly-navy/10 mt-auto shrink-0 w-full z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div
+                    class="w-6 h-6 flex items-center justify-center rounded-lg shadow-sm group-hover:rotate-6 transition-transform">
+                    <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF"
+                        class="w-full h-full object-cover rounded-lg">
+                </div>
+                <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+                 <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/help.html">Help</a>
+            </div>
+
+            <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">
+                <p>© 2026. Sparsh Digital Solutions.</p>
+                <div class="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded-full shadow-sm">
+                    <div class="w-2 h-2 bg-vibrant-turquoise rounded-full animate-[pulse_2s_ease-in-out_infinite]">
+                    </div>
+                    <span>Servers Happy</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Generation Confirmation Modal -->
+    <div id="generationConfirmModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div
+            class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl border-4 border-white overflow-hidden transform scale-95 transition-transform duration-300 relative">
+            <div class="p-8 pb-6 flex flex-col items-center text-center">
+                <div
+                    class="w-20 h-20 bg-vibrant-turquoise/20 rounded-[1.5rem] flex items-center justify-center mb-4 rotate-3">
+                </div>
+                <h3 class="text-3xl font-black text-slate-800 mb-2">Ready?</h3>
+                <h4 class="text-lg font-bold text-slate-600 mb-4 tracking-tight leading-snug">
+                    You are about to generate <span id="confirmPdfCount"
+                        class="text-vibrant-turquoise font-black">0</span> PDFs. This will consume <span
+                        id="confirmCreditCount" class="text-vibrant-coral font-black">0</span> credits.
+                </h4>
+            </div>
+            <div class="p-6 bg-slate-50/80 border-t-2 border-slate-100 flex flex-col gap-3">
+                <button id="confirmGenerateBtn"
+                    class="w-full bg-vibrant-turquoise text-white px-6 py-3.5 rounded-2xl font-black text-lg shadow-[0_4px_0_0_#00ACC1] hover:translate-y-1 hover:shadow-[0_2px_0_0_#00ACC1] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl">rocket_launch</span>
+                    Confirm & Generate
+                </button>
+                <button id="cancelGenerateBtn"
+                    class="w-full bg-white border-2 border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 px-6 py-3 rounded-2xl font-bold transition-all">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insufficient Credits Modal -->
+    <div id="creditsModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div
+            class="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl border-4 border-white overflow-hidden transform scale-95 transition-transform duration-300 relative">
+            <div class="p-8 pb-6 flex flex-col items-center text-center">
+                <div class="w-20 h-20 bg-soft-coral/30 rounded-[1.5rem] flex items-center justify-center mb-4 rotate-3">
+                    <span class="material-symbols-outlined text-vibrant-coral text-5xl">error</span>
+                </div>
+                <h3 class="text-3xl font-black text-slate-800 mb-2">Oops!</h3>
+                <h4 class="text-xl font-bold text-slate-600 mb-4 tracking-tight">Not Enough Credits</h4>
+                <div class="bg-slate-50 w-full rounded-2xl p-4 border-2 border-slate-100 mb-2">
+                    <p class="text-slate-500 font-bold mb-1">Required: <span id="modalRequiredCredits"
+                            class="text-vibrant-coral font-black ml-1">0</span></p>
+                    <p class="text-slate-500 font-bold object-contain">Available: <span id="modalCurrentCredits"
+                            class="text-vibrant-turquoise font-black ml-1">0</span></p>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-50/80 border-t-2 border-slate-100 flex flex-col gap-3">
+                <button id="buyCreditsBtn"
+                    class="w-full bg-warm-yellow text-slate-800 px-6 py-3.5 rounded-2xl font-black text-lg shadow-[0_4px_0_0_#FBC02D] hover:translate-y-1 hover:shadow-[0_2px_0_0_#FBC02D] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                    Buy Credits Now
+                </button>
+                <button id="closeCreditsModalBtn"
+                    class="w-full bg-white border-2 border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300 px-6 py-3 rounded-2xl font-bold transition-all">
+                    Maybe Later
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Application Logic -->
+    <script type="module">
+        import { checkAuth, hasBulkFillAccess } from '/js/auth.js';
+
+        // Ensure user is authenticated
+        checkAuth(true);
+
+        // Ensure user is an admin or has bulk access before allowing interactions
+        hasBulkFillAccess().then(hasAccess => {
+            if (!hasAccess) {
+                alert('Access Denied: You do not have permission to use the Bulk Fill feature.');
+                window.location.replace('/app.html');
+            }
+        });
+    </script>
+    <script type="module" src="/js/bulk-fill.js"></script>
+
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+
+    <!-- Global Styling overrides removed -->
+</body>
+
+</html>

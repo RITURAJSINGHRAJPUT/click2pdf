@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon_io/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon_io/favicon-16x16.png" />
+  <link rel="icon" type="image/x-icon" href="/assets/favicon_io/favicon.ico" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Click2PDF – Free Online PDF Form Filler &amp; PDF Tools</title>
+  <meta name="description"
+    content="Click2PDF offers free online PDF form filler, PDF converter, merge, split and compression tools. Fast, secure and easy to use PDF tools for students and professionals." />
+  <meta name="keywords"
+    content="pdf filler, online pdf editor, free pdf tools, merge pdf, split pdf, convert pdf, click2pdf" />
+
+  <link rel="canonical" href="https://click2pdf.in/" />
+
+  <meta property="og:title" content="Click2PDF – Free Online PDF Form Filler &amp; PDF Tools" />
+  <meta property="og:description"
+    content="Click2PDF offers free online PDF form filler, PDF converter, merge, split and compression tools. Fast, secure and easy to use PDF tools for students and professionals." />
+  <meta property="og:image" content="https://click2pdf.in/assets/favicon_io/android-chrome-512x512.png" />
+  <meta property="og:url" content="https://click2pdf.in/" />
+  <meta property="og:type" content="website" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Click2PDF – Free Online PDF Form Filler &amp; PDF Tools" />
+  <meta name="twitter:description"
+    content="Click2PDF offers free online PDF form filler, PDF converter, merge, split and compression tools. Fast, secure and easy to use PDF tools for students and professionals." />
+  <meta name="twitter:image" content="https://click2pdf.in/assets/favicon_io/android-chrome-512x512.png" />
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+    rel="stylesheet" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#00BCD4" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/apple-touch-icon.png" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "soft-turquoise": "#B2EBF2",
+            "vibrant-turquoise": "#00BCD4",
+            "soft-coral": "#FFCCBC",
+            "vibrant-coral": "#FF5722",
+            "sunny-yellow": "#FFF9C4",
+            "warm-yellow": "#FFD54F",
+            "bright-yellow": "#FFEE58",
+            "friendly-navy": "#37474F",
+          },
+          fontFamily: {
+            sans: ["Quicksand", "sans-serif"],
+          },
+          borderRadius: {
+            "super-rounded": "3rem",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #fffdf5;
+      color: #37474f;
+      font-family: "Quicksand", sans-serif;
+    }
+
+    .hero-gradient {
+      background: radial-gradient(circle at center, #fff9c4 0%, #fffdf5 70%);
+    }
+
+    .organic-blob {
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    }
+
+    .hand-drawn-path {
+      stroke-dasharray: 10;
+      stroke-linecap: round;
+    }
+
+    .cartoon-character-hover:hover .character-head {
+      transform: translateY(-10px) rotate(5deg);
+    }
+
+    .button-tactile {
+      box-shadow: 0 6px 0 0 rgba(0, 0, 0, 0.1);
+      transition: all 0.15s ease-in-out;
+    }
+
+    .button-tactile:active {
+      box-shadow: none;
+      transform: translateY(4px);
+    }
+
+    .pricing-bg {
+      background:
+        radial-gradient(circle at top right, #fff9c4 0%, transparent 40%),
+        radial-gradient(circle at bottom left, #b2ebf2 0%, transparent 40%);
+    }
+
+    .pro-glow {
+      box-shadow: 0 0 40px rgba(255, 87, 34, 0.15);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings:
+        "FILL" 0,
+        "wght" 400,
+        "GRAD" 0,
+        "opsz" 48;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body class="antialiased overflow-x-hidden">
+  <!-- Auth Check -->
+  <script type="module">
+    import { checkAuth } from "./js/auth.js";
+    checkAuth(false, true);
+  </script>
+
+  <!-- Navbar -->
+  <nav class="py-1 md:py-2 px-4 md:px-8 max-w-7xl mx-auto flex justify-between items-center relative z-50 border-b border-friendly-navy/10">
+    <a href="/" class="flex items-center gap-2 group cursor-pointer">
+      <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md group-hover:rotate-0 transition-transform">
+        <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF" class="w-full h-full object-cover rounded-lg" />
+      </div>
+      <span class="font-bold text-xl md:text-2xl tracking-tight text-vibrant-turquoise">Click2PDF</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-bold text-friendly-navy/80">
+      <a href="#features" class="hover:text-vibrant-coral transition-colors">Features</a>
+      <a href="#how-it-works" class="hover:text-vibrant-coral transition-colors">How It Works</a>
+      <a href="#pricing" class="hover:text-vibrant-coral transition-colors">Pricing</a>
+    </div>
+    <div class="flex items-center gap-3 md:gap-6">
+      <a class="bg-vibrant-coral text-white px-4 py-1.5 md:px-5 md:py-2 rounded-full font-extrabold text-sm button-tactile" href="/login.html">
+        Get Started
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero-gradient pt-16 pb-20 px-4 md:px-6 relative">
+      <div class="max-w-5xl mx-auto text-center relative flex flex-col items-center">
+        <div class="absolute top-0 -left-10 w-20 h-20 bg-soft-turquoise organic-blob opacity-40 blur-xl animate-pulse"></div>
+        <div class="absolute top-20 -right-10 w-32 h-32 bg-soft-coral organic-blob opacity-30 blur-2xl"></div>
+
+       <h1 class="text-4xl md:text-5xl lg:text-[4rem] font-extrabold text-friendly-navy mb-4 leading-tight">
+          PDF Tools That <br class="md:hidden" />
+          <span class="text-vibrant-coral relative inline-block whitespace-nowrap">
+            Just Work.
+            <svg class="absolute -bottom-2 left-0 w-full" fill="none" height="10" viewBox="0 0 300 15"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 10C50 2 250 2 295 10" stroke="#FF5722" stroke-linecap="round" stroke-width="6"></path>
+            </svg>
+          </span>
+        </h1>
+
+        <p class="text-base md:text-xl text-friendly-navy/80 mb-8 max-w-2xl mx-auto font-bold px-4">
+          Professional-grade PDF utilities right in your browser. Fill forms securely, merge documents seamlessly, and convert files instantly without watermarks or software installations.
+        </p>
+
+        <div class="relative w-full max-w-xl mx-auto mt-10 z-10">
+          <div class="bg-white/90 backdrop-blur-md border border-friendly-navy/10 py-10 px-8 rounded-[2rem] shadow-[0_12px_40px_rgb(0,0,0,0.06)] text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-vibrant-turquoise to-vibrant-coral opacity-80"></div>
+            
+            <h2 class="text-2xl md:text-3xl font-extrabold text-friendly-navy mb-3">
+               Ready to streamline your workflow?
+            </h2>
+            <p class="text-base text-friendly-navy/70 font-bold mb-8">
+              Join thousands of professionals already saving time with our intelligent PDF utilities.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+              <a href="/login.html" class="bg-gradient-to-r from-vibrant-coral to-[#ff7e5a] text-white px-8 py-3.5 rounded-xl font-extrabold text-base hover:-translate-y-1 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group">
+                <span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">rocket_launch</span>
+                Start For Free
+              </a>
+              <a href="#features" class="bg-transparent border-2 border-friendly-navy/10 text-friendly-navy px-8 py-3.5 rounded-xl font-extrabold text-base hover:border-vibrant-turquoise hover:text-vibrant-turquoise transition-all flex items-center justify-center gap-2">
+                Explore Features
+              </a>
+            </div>
+            
+            <div class="flex justify-center gap-5 mt-8 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-vibrant-turquoise text-[18px]">verified_user</span>
+                <span class="text-xs font-extrabold text-friendly-navy/60">No credit card required</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                 <span class="material-symbols-outlined text-vibrant-turquoise text-[18px]">redeem</span>
+                 <span class="text-xs font-extrabold text-friendly-navy/60">10 Free Credits included</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS BAR -->
+    <section class="border-y-2 border-dashed border-friendly-navy/10 py-10 md:py-12 px-4 bg-soft-turquoise/5">
+      <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-3xl md:text-4xl font-extrabold text-vibrant-turquoise mb-1">10K+</div>
+          <div class="text-sm text-friendly-navy/60 font-bold">PDFs Processed</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-extrabold text-vibrant-coral mb-1">99.9%</div>
+          <div class="text-sm text-friendly-navy/60 font-bold">Uptime</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-extrabold text-warm-yellow mb-1">100%</div>
+          <div class="text-sm text-friendly-navy/60 font-bold">Secure &amp; Private</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-extrabold text-vibrant-turquoise mb-1">5★</div>
+          <div class="text-sm text-friendly-navy/60 font-bold">User Rated</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES GRID -->
+    <section id="features" class="py-16 md:py-20 px-4 md:px-6">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-12 text-friendly-navy">
+          Comprehensive Document Solutions
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          
+          <div class="bg-white border-4 border-dashed border-soft-turquoise rounded-super-rounded p-6 md:p-8 hover:-translate-y-2 transition-transform shadow-md hover:shadow-lg text-center">
+            <div class="w-16 h-16 bg-soft-turquoise organic-blob mx-auto flex items-center justify-center mb-5 border-2 border-white shadow-sm">
+              <span class="material-symbols-outlined text-3xl text-vibrant-turquoise">edit_document</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-friendly-navy">Advanced Form Filling</h3>
+            <p class="text-sm font-bold text-friendly-navy/70 leading-relaxed">Accurately complete any PDF form layout. Utilize auto-detection for fields, input data, and securely sign documents before instant download.</p>
+          </div>
+          
+          <div class="bg-white border-4 border-dashed border-soft-coral rounded-super-rounded p-6 md:p-8 hover:-translate-y-2 transition-transform shadow-md hover:shadow-lg text-center">
+            <div class="w-16 h-16 bg-soft-coral organic-blob mx-auto flex items-center justify-center mb-5 border-2 border-white shadow-sm">
+              <span class="material-symbols-outlined text-3xl text-vibrant-coral">dynamic_form</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-friendly-navy">Automated Bulk Processing</h3>
+            <p class="text-sm font-bold text-friendly-navy/70 leading-relaxed">Streamline mass document generation. Upload CSV data sets to automatically populate hundreds of personalized certificates, invoices, or letters in minutes.</p>
+          </div>
+
+          <div class="bg-white border-4 border-dashed border-sunny-yellow rounded-super-rounded p-6 md:p-8 hover:-translate-y-2 transition-transform shadow-md hover:shadow-lg text-center">
+            <div class="w-16 h-16 bg-sunny-yellow organic-blob mx-auto flex items-center justify-center mb-5 border-2 border-white shadow-sm">
+              <span class="material-symbols-outlined text-3xl text-warm-yellow">merge</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-friendly-navy">Document Merging</h3>
+            <p class="text-sm font-bold text-friendly-navy/70 leading-relaxed">Consolidate multiple files into a single, cohesive PDF. Easily drag to reorder pages, preview the final structure, and execute merges seamlessly.</p>
+          </div>
+
+          <div class="bg-white border-4 border-dashed border-soft-coral rounded-super-rounded p-6 md:p-8 hover:-translate-y-2 transition-transform shadow-md hover:shadow-lg text-center">
+            <div class="w-16 h-16 bg-soft-coral organic-blob mx-auto flex items-center justify-center mb-5 border-2 border-white shadow-sm">
+              <span class="material-symbols-outlined text-3xl text-vibrant-coral">content_cut</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-friendly-navy">Precision Splitting</h3>
+            <p class="text-sm font-bold text-friendly-navy/70 leading-relaxed">Extract core pages or segment large documents into manageable sections. Maintain complete control over your document architecture.</p>
+          </div>
+
+          <div class="bg-white border-4 border-dashed border-sunny-yellow rounded-super-rounded p-6 md:p-8 hover:-translate-y-2 transition-transform shadow-md hover:shadow-lg text-center">
+            <div class="w-16 h-16 bg-sunny-yellow organic-blob mx-auto flex items-center justify-center mb-5 border-2 border-white shadow-sm">
+              <span class="material-symbols-outlined text-3xl text-warm-yellow">swap_horiz</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-friendly-navy">Format Conversion</h3>
+            <p class="text-sm font-bold text-friendly-navy/70 leading-relaxed">Convert between PDFs and standard formats like Word files and image types with high-fidelity, lossless rendering engines.</p>
+          </div>
+
+          <div class="bg-white border-4 border-dashed border-soft-turquoise rounded-super-rounded p-6 md:p-8 hover:-translate-y-2 transition-transform shadow-md hover:shadow-lg text-center">
+            <div class="w-16 h-16 bg-soft-turquoise organic-blob mx-auto flex items-center justify-center mb-5 border-2 border-white shadow-sm">
+              <span class="material-symbols-outlined text-3xl text-vibrant-turquoise">shield</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-2 text-friendly-navy">Enterprise-Grade Security</h3>
+            <p class="text-sm font-bold text-friendly-navy/70 leading-relaxed">Rely on end-to-end encryption and guaranteed 30-minute auto-deletion protocols to ensure your sensitive data remains entirely private.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- INLINE PRICING -->
+    <section id="pricing" class="py-16 md:py-20 px-4 md:px-6 relative">
+      <div class="pricing-bg absolute inset-0 -z-10 opacity-30"></div>
+      <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-extrabold text-friendly-navy mb-3">
+             Select Your Tier
+          </h2>
+          <p class="text-base md:text-lg text-friendly-navy/70 font-bold mb-4">
+             1 Credit = 1 Procedure. Transparent costs with zero recurring commitments.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-5 md:gap-5 items-stretch flex-1">
+          <!-- Free -->
+          <div class="bg-white/90 backdrop-blur-sm p-6 rounded-[1.5rem] shadow-lg border-4 border-transparent hover:border-soft-turquoise transition-all flex flex-col items-start text-left h-full">
+            <div class="bg-soft-turquoise/30 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+               <span class="material-symbols-outlined text-2xl text-vibrant-turquoise">send</span>
+            </div>
+            <h3 class="text-xl font-black mb-1 text-friendly-navy">Free Starter</h3>
+            <div class="flex items-baseline gap-1 mb-1">
+               <span class="text-3xl font-black text-friendly-navy">₹0</span>
+            </div>
+            <div class="text-vibrant-turquoise font-bold text-sm mb-3">
+               10 Credits
+               <span class="text-friendly-navy/50 text-xs">(One-Time)</span>
+            </div>
+            <p class="text-friendly-navy/70 font-bold text-xs leading-relaxed mb-5">
+               Ideal for technical evaluations. Risk-free access.
+            </p>
+            <ul class="text-xs font-bold text-friendly-navy/70 space-y-3 mb-6 flex-grow w-full">
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-vibrant-turquoise text-[16px]">check_circle</span>
+                 <span>10 Credits</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-vibrant-coral text-[16px]">speed</span>
+                 <span>Standard Infrastructure</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-friendly-navy/30 text-[16px]">close</span>
+                 <span class="line-through text-friendly-navy/40">No Bulk Access</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-friendly-navy/30 text-[16px]">close</span>
+                 <span class="line-through text-friendly-navy/40">Restricted Toolkit</span>
+               </li>
+            </ul>
+            <a href="/login.html" class="w-full py-3 rounded-xl font-black text-sm text-center bg-soft-turquoise/20 text-vibrant-turquoise border-2 border-vibrant-turquoise/30 hover:bg-vibrant-turquoise hover:text-white transition-all mt-auto block">
+               Start Free
+            </a>
+          </div>
+
+          <!-- Standard -->
+          <div class="bg-white p-6 rounded-[1.5rem] shadow-xl border-4 border-vibrant-coral relative pro-glow md:scale-105 z-10 flex flex-col items-start text-left h-full">
+             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-vibrant-coral text-white px-4 py-1 rounded-full font-black text-[10px] tracking-widest shadow-md whitespace-nowrap">
+               MOST POPULAR
+             </div>
+             <div class="bg-soft-coral/30 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+               <span class="material-symbols-outlined text-2xl text-vibrant-coral">rocket_launch</span>
+             </div>
+             <h3 class="text-xl font-black mb-1 text-friendly-navy">Standard</h3>
+             <div class="flex items-baseline gap-1 mb-1">
+               <span class="text-3xl font-black text-friendly-navy">₹129</span>
+             </div>
+             <div class="text-vibrant-coral font-bold text-sm mb-1">
+               150 Credits
+             </div>
+             <div class="text-friendly-navy/80 font-bold text-[10px] mb-3 bg-soft-coral/20 px-2 py-0.5 rounded">
+               Just ₹0.86 per credit
+             </div>
+             <p class="text-friendly-navy/70 font-bold text-xs leading-relaxed mb-5">
+               Engineered for high-frequency individual use.
+             </p>
+             <ul class="text-xs font-bold text-friendly-navy/70 space-y-3 mb-6 flex-grow w-full">
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-vibrant-coral text-[16px]">check_circle</span>
+                 <span class="text-vibrant-coral">150 Credits</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-vibrant-coral text-[16px]">bolt</span>
+                 <span class="text-vibrant-coral">Enhanced Allocation</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-vibrant-coral text-[16px]">check_circle</span>
+                 <span>Scalable Bulk Allowed</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-vibrant-coral text-[16px]">check_circle</span>
+                 <span>CSV / Full Utility</span>
+               </li>
+             </ul>
+             <a href="/login.html" class="w-full py-3 rounded-xl font-black text-sm text-center bg-vibrant-coral text-white button-tactile mt-auto mb-2 block">
+               Secure Plan
+             </a>
+             <p class="text-center w-full text-[10px] font-bold text-friendly-navy/40">
+               Direct billing. Excludes subscriptions.
+             </p>
+          </div>
+
+          <!-- Premium -->
+          <div class="bg-white/90 backdrop-blur-sm p-6 rounded-[1.5rem] shadow-lg border-4 border-transparent hover:border-sunny-yellow transition-all flex flex-col items-start text-left h-full">
+             <div class="bg-sunny-yellow/30 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+               <span class="material-symbols-outlined text-2xl text-warm-yellow">groups</span>
+             </div>
+             <h3 class="text-xl font-black mb-1 text-friendly-navy">Premium</h3>
+             <div class="flex items-baseline gap-1 mb-1">
+               <span class="text-2xl font-black mt-1 text-friendly-navy">Custom Pricing</span>
+             </div>
+             <div class="text-warm-yellow font-bold text-sm mb-3 mt-1">
+               Custom / Bulk Credits
+             </div>
+             <p class="text-friendly-navy/70 font-bold text-xs leading-relaxed mb-5">
+               Optimal for enterprises handling heavy traffic.
+             </p>
+             <ul class="text-xs font-bold text-friendly-navy/70 space-y-3 mb-6 flex-grow w-full">
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-warm-yellow text-[16px]">check_circle</span>
+                 <span>Enterprise Quotation</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-warm-yellow text-[16px]">speed</span>
+                 <span>Targeted Workloads</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-warm-yellow text-[16px]">check_circle</span>
+                 <span>Dedicated Service Integration</span>
+               </li>
+               <li class="flex items-start gap-2">
+                 <span class="material-symbols-outlined text-warm-yellow text-[16px]">support_agent</span>
+                 <span>Account Management</span>
+               </li>
+             </ul>
+             <a href="/contact.html" class="w-full py-3 rounded-xl font-black text-center text-sm bg-warm-yellow text-friendly-navy button-tactile mt-auto mb-2 block">
+               Initiate Inquiry
+             </a>
+             <p class="text-center w-full text-[10px] font-bold text-friendly-navy/50">
+               Deployable across global organizational groups.
+             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="py-16 md:py-24 px-4 md:px-6 overflow-hidden">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16 md:mb-20">
+          <h2 class="text-3xl md:text-5xl font-extrabold text-friendly-navy mb-4 tracking-tight">
+            Streamlined Protocol
+          </h2>
+          <p class="text-friendly-navy/60 font-medium text-base md:text-lg max-w-2xl mx-auto">
+             Three simple steps to professional document generation. No complex configurations required.
+          </p>
+        </div>
+
+        <div class="relative grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+          <!-- Desktop Connector Line -->
+          <div class="hidden md:block absolute top-[45px] left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-friendly-navy/5 via-vibrant-turquoise/30 to-friendly-navy/5 -z-10"></div>
+
+          <!-- Step 1 -->
+          <div class="group flex flex-col items-center text-center">
+            <div class="w-20 h-20 md:w-24 md:h-24 bg-white border border-friendly-navy/10 rounded-2xl flex items-center justify-center mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group-hover:shadow-[0_8px_30px_rgb(0,188,212,0.15)] group-hover:-translate-y-2 transition-all duration-300 relative z-10">
+              <div class="absolute -top-3 -right-3 w-8 h-8 bg-friendly-navy text-white rounded-full flex items-center justify-center font-black text-sm border-4 border-white">1</div>
+              <span class="material-symbols-outlined text-[32px] md:text-[40px] text-vibrant-turquoise group-hover:scale-110 transition-transform duration-300">upload_file</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-3 text-friendly-navy">Upload Your File</h3>
+            <p class="text-sm font-medium text-friendly-navy/70 leading-relaxed max-w-[280px]">
+               Drag & drop or click to upload. We securely ingest PDF, standard image formats, and Word documents into RAM.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="group flex flex-col items-center text-center">
+            <div class="w-20 h-20 md:w-24 md:h-24 bg-white border border-friendly-navy/10 rounded-2xl flex items-center justify-center mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group-hover:shadow-[0_8px_30px_rgb(255,87,34,0.15)] group-hover:-translate-y-2 transition-all duration-300 relative z-10">
+              <div class="absolute -top-3 -right-3 w-8 h-8 bg-friendly-navy text-white rounded-full flex items-center justify-center font-black text-sm border-4 border-white">2</div>
+              <span class="material-symbols-outlined text-[32px] md:text-[40px] text-vibrant-coral group-hover:scale-110 transition-transform duration-300">app_registration</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-3 text-friendly-navy">Edit & Process</h3>
+            <p class="text-sm font-medium text-friendly-navy/70 leading-relaxed max-w-[280px]">
+              Fill fields, combine document arrays, or map CSV data to templates directly within the high-performance browser interface.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="group flex flex-col items-center text-center">
+            <div class="w-20 h-20 md:w-24 md:h-24 bg-white border border-friendly-navy/10 rounded-2xl flex items-center justify-center mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group-hover:shadow-[0_8px_30px_rgb(0,188,212,0.15)] group-hover:-translate-y-2 transition-all duration-300 relative z-10">
+               <div class="absolute -top-3 -right-3 w-8 h-8 bg-friendly-navy text-white rounded-full flex items-center justify-center font-black text-sm border-4 border-white">3</div>
+              <span class="material-symbols-outlined text-[32px] md:text-[40px] text-vibrant-turquoise group-hover:scale-110 transition-transform duration-300">download</span>
+            </div>
+            <h3 class="text-xl font-extrabold mb-3 text-friendly-navy">Export Result</h3>
+            <p class="text-sm font-medium text-friendly-navy/70 leading-relaxed max-w-[280px]">
+              Acquire your finalized output instantaneously with zero queueing latency. Download the finalized artifacts to deploy.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY TRUST SECTION -->
+    <section class="py-10 md:py-12 px-4 md:px-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="bg-friendly-navy text-white rounded-[2rem] p-6 md:p-8 relative overflow-hidden shadow-2xl">
+          <!-- Decorative Background Elements -->
+          <div class="absolute top-0 right-0 w-48 h-48 bg-vibrant-turquoise/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-vibrant-coral/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
+
+          <div class="relative z-10 flex flex-col lg:flex-row items-center gap-6 md:gap-10">
+            <!-- Left side: Icon & Title -->
+            <div class="w-full lg:w-1/3 text-center lg:text-left flex flex-col items-center lg:items-start">
+              <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-[1.25rem] flex items-center justify-center mb-4 border border-white/20 shadow-inner">
+                <span class="material-symbols-outlined text-[32px] text-soft-turquoise">verified_user</span>
+              </div>
+              <h2 class="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">Bank-Grade<br class="hidden lg:block" /> Security.</h2>
+              <div class="inline-flex items-center gap-1.5 bg-vibrant-coral/20 border border-vibrant-coral/30 text-soft-coral font-bold px-3 py-1 rounded-full text-xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-vibrant-coral animate-pulse"></span>
+                100% Confidential
+              </div>
+            </div>
+
+            <!-- Right side: Content & Features -->
+            <div class="w-full lg:w-2/3">
+              <p class="text-white/80 text-sm md:text-base font-bold leading-relaxed mb-6 text-center lg:text-left">
+                Your privacy is our baseline. All file transfers and modifications are protected with strict TLS encryption. Source files and generated PDFs are automatically <strong class="text-white">purged from our servers after 30 minutes</strong>. No logging, no persistent storage, and zero backdoor access.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl flex flex-col items-center lg:items-start text-center lg:text-left hover:bg-white/10 transition-colors">
+                  <span class="material-symbols-outlined text-soft-turquoise text-[24px] mb-2">timer_off</span>
+                  <h4 class="font-extrabold text-white text-xs mb-0.5">Auto-Delete</h4>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider">Files wiped in 30m</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl flex flex-col items-center lg:items-start text-center lg:text-left hover:bg-white/10 transition-colors">
+                  <span class="material-symbols-outlined text-soft-turquoise text-[24px] mb-2">enhanced_encryption</span>
+                  <h4 class="font-extrabold text-white text-xs mb-0.5">Encrypted</h4>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider">End-to-end TLS</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl flex flex-col items-center lg:items-start text-center lg:text-left hover:bg-white/10 transition-colors">
+                  <span class="material-symbols-outlined text-soft-turquoise text-[24px] mb-2">visibility_off</span>
+                  <h4 class="font-extrabold text-white text-xs mb-0.5">Zero Logs</h4>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider">Total anonymity</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing information moved to /Buy-Credits.html internals -->
+
+    <!-- FINAL CTA -->
+    <section class="py-12 md:py-16 px-4 text-center">
+      <div class="max-w-3xl mx-auto bg-warm-yellow/10 rounded-[2rem] p-8 md:p-10 border-2 border-dashed border-warm-yellow/30">
+        <h2 class="text-2xl md:text-4xl font-extrabold mb-5 text-friendly-navy">
+          Ready to optimize your document pipeline?
+        </h2>
+        <a href="/login.html"
+          class="inline-flex bg-vibrant-turquoise text-white px-6 md:px-8 py-3 rounded-full font-black text-lg md:text-xl button-tactile hover:-translate-y-1 transition-transform items-center gap-2 mx-auto shadow-md hover:shadow-lg">
+          <span class="material-symbols-outlined text-2xl">bolt</span>
+          Get Started — It's Free
+        </a>
+        <p class="mt-4 font-bold text-sm text-friendly-navy/50">
+          No credit card required. 10 free credits on signup.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-[#e3eaef] py-4 px-4 md:px-6 border-t border-friendly-navy/10 mt-auto shrink-0 w-full z-10">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-2 group cursor-pointer">
+        <div class="w-6 h-6 flex items-center justify-center rounded-lg shadow-sm group-hover:rotate-6 transition-transform">
+          <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF" class="w-full h-full object-cover rounded-lg" />
+        </div>
+        <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+        <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+        <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+        <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+        <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+        <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
+        <a class="hover:text-vibrant-coral transition-colors" href="/help.html">Help</a>
+      </div>
+
+      <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">
+        <p>© 2026. Sparsh Digital Solutions.</p>
+        <div class="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded-full shadow-sm">
+          <div class="w-2 h-2 bg-vibrant-turquoise rounded-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+          <span>Servers Happy</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon_io/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon_io/apple-touch-icon.png">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Verify Payments - Admin Panel</title>
+
+    <!-- Design System (Tailwind + Fonts) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/css/admin.css">
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00BCD4">
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-turquoise': '#B2EBF2',
+                        'vibrant-turquoise': '#00BCD4',
+                        'soft-coral': '#FFCCBC',
+                        'vibrant-coral': '#FF5722',
+                        'sunny-yellow': '#FFF9C4',
+                        'warm-yellow': '#FFD54F',
+                        'friendly-navy': '#37474F',
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(77, 208, 225, 0.2);
+            border-top-color: #4DD0E1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden min-h-screen bg-slate-50 flex flex-col">
+    <!-- Auth Check -->
+    <script type="module">
+        import { checkAuth, logout } from '/js/auth.js';
+        checkAuth(true); // Redirect to login if not authenticated
+
+        window.adminLogout = function (e) {
+            e.preventDefault();
+            logout();
+        }
+    </script>
+
+    <!-- Top Header -->
+    <header
+        class="h-16 lg:h-20 bg-white/80 backdrop-blur-md border-b border-friendly-navy/10 shadow-sm flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
+        <!-- Left: Logo & Nav -->
+        <div class="flex items-center gap-8">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 flex items-center justify-center rounded-xl rotate-3 shadow-md group-hover:rotate-0 transition-transform cursor-pointer">
+                    <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <span class="font-bold text-xl text-friendly-navy tracking-tight hidden sm:block">Click2PDF</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex items-center gap-2">
+                <a href="/master/admin-dashboard.html"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-soft-turquoise/30 hover:text-vibrant-turquoise transition-all text-sm">
+                    <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="/master/user_management.html"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-soft-turquoise/30 hover:text-vibrant-turquoise transition-all text-sm">
+                    <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+                    User Management
+                </a>
+                <a href="/master/templates.html"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-soft-turquoise/30 hover:text-vibrant-turquoise transition-all text-sm">
+                    <span class="material-symbols-outlined text-[18px]">file_copy</span>
+                    Templates
+                </a>
+                <a href="/master/bulkfill_credits.html"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-soft-turquoise/30 hover:text-vibrant-turquoise transition-all text-sm border border-transparent shadow-none">
+                    <span class="material-symbols-outlined text-[18px]">toll</span>
+                    Credits
+                </a>
+                <a href="/master/verify_payments.html"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-vibrant-turquoise bg-soft-turquoise/40 font-bold border border-vibrant-turquoise/20 shadow-sm text-sm">
+                    <span class="material-symbols-outlined text-[18px]">payments</span>
+                    Verify Payments
+                </a>
+            </nav>
+        </div>
+
+        <!-- Right: Profile Avatar -->
+        <div class="relative flex items-center">
+            <div class="w-10 h-10 rounded-xl overflow-hidden shadow-sm border-2 border-white bg-slate-100 cursor-pointer hover:ring-2 hover:ring-vibrant-turquoise transition-all"
+                id="mobileMenuToggle">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=00BCD4&color=fff&rounded=true&bold=true"
+                    alt="Admin" class="w-full h-full object-cover">
+            </div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-sm font-extrabold text-friendly-navy">Admin</p>
+                    <p class="text-[11px] font-bold text-slate-400">Super Admin</p>
+                </div>
+                <a href="#"
+                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-rose-500 hover:bg-rose-50 transition-colors rounded-b-xl"
+                    id="dropdownLogout">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav Drawer -->
+    <div class="mobile-nav-drawer lg:hidden bg-white border-b border-slate-200 shadow-md sticky top-16 z-30"
+        id="mobileNavDrawer">
+        <nav class="flex flex-col p-3 gap-1">
+            <a href="/master/admin-dashboard.html" class="mobile-nav-link">
+                <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                Dashboard
+            </a>
+            <a href="/master/user_management.html" class="mobile-nav-link">
+                <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+                User Management
+            </a>
+            <a href="/master/templates.html" class="mobile-nav-link">
+                <span class="material-symbols-outlined text-[18px]">file_copy</span>
+                Templates
+            </a>
+            <a href="/master/bulkfill_credits.html" class="mobile-nav-link">
+                <span class="material-symbols-outlined text-[18px]">toll</span>
+                Credits
+            </a>
+            <a href="/master/verify_payments.html" class="mobile-nav-link active-link">
+                <span class="material-symbols-outlined text-[18px]">payments</span>
+                Verify Payments
+            </a>
+            <div class="border-t border-slate-200 mt-2 pt-2">
+                <a href="#" class="mobile-nav-link text-rose-500 hover:!bg-rose-50" id="drawerLogout">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    Logout
+                </a>
+            </div>
+        </nav>
+    </div>
+    <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="mb-8 flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-bold text-friendly-navy flex items-center gap-3">
+                    <span class="material-symbols-outlined text-vibrant-coral text-4xl">payments</span>
+                    Verify Payments
+                </h1>
+                <p class="text-slate-500 mt-2 font-medium">Review and approve pending payment requests from users.
+                    Approved payments will add 500 bulk credits to their account.</p>
+            </div>
+            <!-- Refresh Button -->
+            <button id="refreshBtn"
+                class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:border-vibrant-turquoise hover:text-vibrant-turquoise transition-all shadow-sm">
+                <span class="material-symbols-outlined text-sm">refresh</span>
+                Refresh List
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-4 mb-6 border-b border-slate-200">
+            <button id="tabPending"
+                class="pb-4 px-2 text-sm font-bold text-vibrant-turquoise border-b-2 border-vibrant-turquoise transition-all">Pending
+                Requests</button>
+            <button id="tabHistory"
+                class="pb-4 px-2 text-sm font-bold text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all">Payment
+                History</button>
+        </div>
+
+        <!-- Filters & Table Area -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col mb-10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                        <tr
+                            class="bg-slate-50/50 text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-100">
+                            <th class="px-6 py-4">User Details</th>
+                            <th class="px-6 py-4">Transaction ID</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4 text-center">Screenshot</th>
+                            <th class="px-6 py-4 text-right" id="actionsHeader">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTableBody" class="bg-white divide-y divide-slate-100">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                    <!-- Empty State (Inside Tbody) -->
+                    <tbody id="emptyState" class="hidden">
+                        <tr>
+                            <td colspan="5" class="p-12 text-center border-t border-slate-100">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div
+                                        class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-4 border-4 border-white shadow-sm ring-1 ring-slate-100/50">
+                                        <span class="material-symbols-outlined text-4xl">check_circle</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-friendly-navy mb-2">All caught up!</h3>
+                                    <p id="emptyStateMsg" class="text-slate-500 font-medium">There are no pending
+                                        payment requests to
+                                        verify.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Loader -->
+            <div id="paymentsLoading" class="py-16 flex flex-col items-center justify-center text-slate-400">
+                <div class="spinner !w-10 !h-10 mb-4"></div>
+                <p class="font-bold">Loading payment requests...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Global App Footer -->
+    <footer class="bg-[#e3eaef] py-4 px-4 md:px-6 border-t border-friendly-navy/10 mt-auto shrink-0 w-full z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div
+                    class="w-6 h-6 flex items-center justify-center rounded-lg shadow-sm group-hover:rotate-6 transition-transform">
+                    <img src="/assets/favicon_io/android-chrome-192x192.png" alt="Click2PDF" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <span class="font-bold text-sm tracking-tight text-friendly-navy">Click2PDF</span>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 font-bold text-xs text-friendly-navy/70 uppercase tracking-wide">
+                 <a class="hover:text-vibrant-coral transition-colors" href="/privacy-policy.html">Privacy</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/return-policy.html">Returns</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/refund-policy.html">Refunds</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/disclaimer.html">Disclaimer</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/contact.html">Contact</a>
+                <a class="hover:text-vibrant-coral transition-colors" href="/help.html">Help</a>
+            </div>
+
+            <div class="flex items-center gap-4 text-friendly-navy/50 font-bold text-xs">
+                <p>© 2026. Sparsh Digital Solutions.</p>
+                <div class="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded-full shadow-sm">
+                    <div class="w-2 h-2 bg-vibrant-turquoise rounded-full animate-[pulse_2s_ease-in-out_infinite]">
+                    </div>
+                    <span>Servers Happy</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Image Preview Modal -->
+    <div id="imageModal"
+        class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="relative max-w-4xl w-full flex flex-col items-center">
+            <button id="closeImageModal"
+                class="absolute -top-12 right-0 md:-right-12 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <img id="modalPreviewImage" src="" alt="Payment Screenshot"
+                class="max-w-full max-h-[80vh] rounded-lg shadow-2xl object-contain bg-white">
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('paymentsTableBody');
+            const loading = document.getElementById('paymentsLoading');
+            const emptyState = document.getElementById('emptyState');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const imageModal = document.getElementById('imageModal');
+            const modalPreviewImage = document.getElementById('modalPreviewImage');
+            const closeImageModal = document.getElementById('closeImageModal');
+
+            let currentTab = 'pending';
+            const tabPending = document.getElementById('tabPending');
+            const tabHistory = document.getElementById('tabHistory');
+            const actionsHeader = document.getElementById('actionsHeader');
+
+            // --- Init ---
+            fetchPayments();
+
+            refreshBtn.addEventListener('click', fetchPayments);
+
+            tabPending.addEventListener('click', () => {
+                currentTab = 'pending';
+                tabPending.classList.replace('text-slate-500', 'text-vibrant-turquoise');
+                tabPending.classList.replace('border-transparent', 'border-vibrant-turquoise');
+                tabHistory.classList.replace('text-vibrant-turquoise', 'text-slate-500');
+                tabHistory.classList.replace('border-vibrant-turquoise', 'border-transparent');
+                actionsHeader.textContent = 'Actions';
+                fetchPayments();
+            });
+
+            tabHistory.addEventListener('click', () => {
+                currentTab = 'history';
+                tabHistory.classList.replace('text-slate-500', 'text-vibrant-turquoise');
+                tabHistory.classList.replace('border-transparent', 'border-vibrant-turquoise');
+                tabPending.classList.replace('text-vibrant-turquoise', 'text-slate-500');
+                tabPending.classList.replace('border-vibrant-turquoise', 'border-transparent');
+                actionsHeader.textContent = 'Status';
+                fetchPayments();
+            });
+
+            async function fetchPayments() {
+                try {
+                    loading.classList.remove('hidden');
+                    tableBody.innerHTML = '';
+                    emptyState.classList.add('hidden');
+
+                    const token = await window.getFirebaseToken();
+                    const endpoint = currentTab === 'pending' ? '/api/admin/payments' : '/api/admin/payments/history';
+                    const res = await fetch(endpoint, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!res.ok) throw new Error('Failed to fetch payments');
+
+                    const data = await res.json();
+                    renderTable(data.payments || []);
+                } catch (error) {
+                    console.error('Error fetching payments:', error);
+                    showToast('Failed to load pending payments', 'error');
+                } finally {
+                    loading.classList.add('hidden');
+                }
+            }
+
+            function renderTable(payments) {
+                if (payments.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    const emptyStateMsg = document.getElementById('emptyStateMsg');
+                    if (emptyStateMsg) {
+                        emptyStateMsg.textContent = currentTab === 'pending' ? 'There are no pending payment requests to verify.' : 'No payment history found.';
+                    }
+                    return;
+                }
+
+                tableBody.innerHTML = payments.map(payment => {
+                    const dateObj = new Date(payment.createdAt);
+                    const formattedDate = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                    const formattedTime = dateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                    const initial = (payment.displayName || payment.email || 'U').charAt(0).toUpperCase();
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500 text-sm">
+                                        ${initial}
+                                    </div>
+                                    <div class="flex flex-col gap-0.5">
+                                        <div class="font-bold text-friendly-navy text-sm">${payment.displayName || 'Unnamed User'}</div>
+                                        <div class="text-[11px] font-semibold text-slate-400">${payment.email}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-mono text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded block w-max">${payment.transactionId}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="font-bold text-slate-600 text-[12px]">${formattedDate}</span>
+                                    <span class="text-[10px] font-bold text-slate-400">${formattedTime}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="window.viewImage('/uploads/payments/${payment.screenshotFilename}')" class="px-3 py-1.5 bg-soft-turquoise/30 text-vibrant-turquoise hover:bg-vibrant-turquoise hover:text-white rounded-lg text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-1.5 focus:outline-none">
+                                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                    View
+                                </button>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                ${currentTab === 'pending' ? `
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="w-8 h-8 rounded-full flex items-center justify-center text-emerald-500 bg-emerald-50 hover:bg-emerald-500 hover:text-white transition-all shadow-sm" title="Approve Payment" onclick="window.approvePayment('${payment.id}')">
+                                            <span class="material-symbols-outlined text-[20px]">check</span>
+                                        </button>
+                                        <button class="w-8 h-8 rounded-full flex items-center justify-center text-rose-500 bg-rose-50 hover:bg-rose-500 hover:text-white transition-all shadow-sm" title="Reject Payment" onclick="window.rejectPayment('${payment.id}')">
+                                            <span class="material-symbols-outlined text-[20px]">close</span>
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div class="flex items-center justify-end">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${payment.status === 'approved' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-rose-600 bg-rose-50 border-rose-200'}">
+                                            <span class="material-symbols-outlined text-[14px]">${payment.status === 'approved' ? 'check_circle' : 'cancel'}</span>
+                                            ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                                        </span>
+                                    </div>
+                                `}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // --- Handlers ---
+            window.viewImage = async (imgUrl) => {
+                // To fetch image securely, you might need to fetch it as a blob with the Authorization header.
+                // However, our Express route is simple check on the Cookie. So let's try just setting src first.
+                // Since `verifySessionCookie` works with cookies, image tags might work out of the box if cookies are sent.
+                // If not, we'll fetch as blob. Let's try blob approach to be safe since it uses Bearer token usually.
+
+                try {
+                    const token = await window.getFirebaseToken();
+                    const response = await fetch(imgUrl, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Network error viewing image');
+
+                    const blob = await response.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+
+                    modalPreviewImage.src = objectUrl;
+                    imageModal.classList.remove('hidden');
+                    imageModal.classList.add('flex');
+                } catch (e) {
+                    console.error(e);
+                    // Fallback to setting src directly, relying on cookie
+                    modalPreviewImage.src = imgUrl;
+                    imageModal.classList.remove('hidden');
+                    imageModal.classList.add('flex');
+                }
+            };
+
+            closeImageModal.addEventListener('click', () => {
+                imageModal.classList.add('hidden');
+                imageModal.classList.remove('flex');
+                if (modalPreviewImage.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(modalPreviewImage.src);
+                }
+                modalPreviewImage.src = '';
+            });
+
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) {
+                    closeImageModal.click();
+                }
+            });
+
+            window.approvePayment = async (id) => {
+                const creditsInput = prompt("How many credits should be granted?", "150");
+                if (creditsInput === null) return; // User cancelled
+
+                const creditsToGrant = parseInt(creditsInput, 10);
+                if (isNaN(creditsToGrant) || creditsToGrant <= 0) {
+                    showToast('Invalid credit amount.', 'error');
+                    return;
+                }
+
+                if (!confirm(`Approve this payment and add ${creditsToGrant} Credits to the user's account?`)) return;
+
+                try {
+                    const token = await window.getFirebaseToken();
+                    const res = await fetch(`/api/admin/payments/${id}/approve`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ credits: creditsToGrant })
+                    });
+
+                    if (!res.ok) throw new Error('Failed to approve payment');
+
+                    showToast(`Payment approved. ${creditsToGrant} Credits added.`);
+                    fetchPayments(); // Refresh list
+                } catch (error) {
+                    console.error(error);
+                    showToast('Failed to approve payment', 'error');
+                }
+            };
+
+            window.rejectPayment = async (id) => {
+                if (!confirm("Are you sure you want to reject this payment request?")) return;
+                try {
+                    const token = await window.getFirebaseToken();
+                    const res = await fetch(`/api/admin/payments/${id}/reject`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!res.ok) throw new Error('Failed to reject payment');
+
+                    showToast('Payment request rejected.', 'error');
+                    fetchPayments(); // Refresh list
+                } catch (error) {
+                    console.error(error);
+                    showToast('Failed to reject payment', 'error');
+                }
+            };
+
+            // --- Toast Util ---
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                const borderColor = type === 'error' ? '#ef4444' : '#10b981';
+
+                toast.style.cssText = `
+                    position: fixed; bottom: 24px; right: 24px; padding: 16px 24px;
+                    background: white; border-radius: 16px; border: 2px solid #e2e8f0;
+                    border-left: 6px solid ${borderColor}; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+                    z-index: 2000; color: #37474F; font-weight: 700; font-size: 0.9rem;
+                    animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                `;
+
+                if (!document.getElementById('toastStyles')) {
+                    const style = document.createElement('style');
+                    style.id = 'toastStyles';
+                    style.innerHTML = '@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }';
+                    document.head.appendChild(style);
+                }
+
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)';
+                    toast.style.transition = 'all 0.3s ease'; setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+    <script>
+        // Mobile nav toggle + Desktop profile dropdown
+        (function () {
+            const btn = document.getElementById('mobileMenuToggle');
+            const drawer = document.getElementById('mobileNavDrawer');
+            const backdrop = document.getElementById('mobileNavBackdrop');
+            const dropdown = document.getElementById('profileDropdown');
+            if (!btn) return;
+
+            function toggleDrawer() {
+                if (drawer) drawer.classList.toggle('open');
+                if (backdrop) backdrop.classList.toggle('visible');
+            }
+            function toggleDropdown() {
+                if (dropdown) dropdown.classList.toggle('open');
+            }
+            function closeDropdown() {
+                if (dropdown) dropdown.classList.remove('open');
+            }
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.innerWidth >= 1024) {
+                    toggleDropdown();
+                } else {
+                    toggleDrawer();
+                }
+            });
+            if (backdrop) backdrop.addEventListener('click', toggleDrawer);
+
+            document.addEventListener('click', (e) => {
+                if (dropdown && !dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            const drawerLogout = document.getElementById('drawerLogout');
+            if (drawerLogout) {
+                drawerLogout.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.adminLogout) window.adminLogout(e);
+                });
+            }
+            const dropdownLogout = document.getElementById('dropdownLogout');
+            if (dropdownLogout) {
+                dropdownLogout.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.adminLogout) window.adminLogout(e);
+                });
+            }
+        })();
+    </script>
+</body>
+
+</html>

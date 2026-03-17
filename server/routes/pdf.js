@@ -1,0 +1,382 @@
+const express = require('express');
+const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const upload = require('../middleware/upload');
+const { parsePDF } = require('../services/pdfParser');
+const { generateFilledPDF, saveGeneratedPDF, encryptPdfBuffer } = require('../services/pdfGenerator');
+const { sendPdfEmail, sendContactEmail } = require('../services/emailService');
+const { deleteSessionFiles } = require('../utils/cleanup');
+const { db } = require('../config/firebase');
+
+const TEMP_DIR = path.join(__dirname, '../../temp');
+
+// In-memory storage for session data
+const sessions = new Map();
+
+/**
+ * Upload PDF
+ * POST /api/upload
+ */
+router.post('/upload', upload.single('pdf'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No PDF file uploaded' });
+        }
+
+        const sessionId = req.sessionId;
+        const pdfPath = req.file.path;
+
+        // Parse PDF and detect fields
+        const pdfData = await parsePDF(pdfPath);
+
+        // Store session data
+        sessions.set(sessionId, {
+            pdfPath,
+            pdfData,
+            fields: pdfData.fields,
+            createdAt: Date.now()
+        });
+
+        res.json({
+            success: true,
+            sessionId,
+            pageCount: pdfData.pageCount,
+            pageInfo: pdfData.pageInfo,
+            fields: pdfData.fields,
+            hasExistingForm: pdfData.hasExistingForm
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Failed to process PDF' });
+    }
+});
+
+/**
+ * Get PDF for viewing
+ * GET /api/pdf/:sessionId
+ */
+router.get('/pdf/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const pdfPath = path.join(TEMP_DIR, `${sessionId}.pdf`);
+
+    if (!fs.existsSync(pdfPath)) {
+        return res.status(404).json({ error: 'PDF not found' });
+    }
+
+    res.sendFile(pdfPath);
+});
+
+/**
+ * Get detected fields
+ * GET /api/fields/:sessionId
+ */
+router.get('/fields/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const session = sessions.get(sessionId);
+
+    if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json({
+        fields: session.fields,
+        pageInfo: session.pdfData.pageInfo
+    });
+});
+
+/**
+ * Update fields
+ * PUT /api/fields/:sessionId
+ */
+router.put('/fields/:sessionId', express.json(), (req, res) => {
+    const { sessionId } = req.params;
+    const { fields } = req.body;
+    const session = sessions.get(sessionId);
+
+    if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+    }
+
+    session.fields = fields;
+    sessions.set(sessionId, session);
+
+    res.json({ success: true });
+});
+
+/**
+ * Generate filled PDF
+ * POST /api/generate/:sessionId
+ */
+router.post('/generate/:sessionId', express.json(), async (req, res) => {
+    const { sessionId } = req.params;
+    const { fields, instances, flatten = false, pdfPassword } = req.body;
+    const session = sessions.get(sessionId);
+    const userId = req.headers['x-user-id'];
+
+    // Auto-generate a random password for PDF protection
+    const crypto = require('crypto');
+    const password = crypto.randomBytes(4).toString('hex'); // 8-char hex password
+
+    console.log(`[Generate] Request received for session: ${sessionId}, has-session: ${!!session}, cookie: ${!!(req.cookies && req.cookies.session)}`);
+
+    if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+    }
+
+    try {
+        // --- Credit Check ---
+        if (userId) {
+            const userDoc = await db.collection('users').doc(userId).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                const currentCredits = userData.bulkCredits || 0;
+                const requiredCredits = (instances && instances.length > 0) ? instances.length : 1;
+                
+                if (userData.role === 'admin') {
+                    console.log(`[Generate] User ${userId} is an admin. Unlimited credits granted.`);
+                } else {
+                    if (currentCredits < requiredCredits) {
+                        return res.status(402).json({
+                            error: `Insufficient credits. You need ${requiredCredits} credit(s) but only have ${currentCredits}. Please purchase more credits.`,
+                            creditsNeeded: requiredCredits,
+                            creditsAvailable: currentCredits
+                        });
+                    }
+
+                    // Deduct credits
+                    await db.collection('users').doc(userId).update({
+                        bulkCredits: currentCredits - requiredCredits
+                    });
+                    console.log(`[Generate] Deducted ${requiredCredits} credit(s) from user ${userId}. Remaining: ${currentCredits - requiredCredits}`);
+                }
+            }
+        }
+
+        let pdfBuffer;
+
+        // Check if we have multiple instances
+        if (instances && instances.length > 1) {
+            // Generate a PDF for each instance and merge them
+            const { PDFDocument, StandardFonts } = require('pdf-lib');
+            const { fillPdfPages } = require('../services/pdfGenerator');
+
+            const mergedPdf = await PDFDocument.create();
+
+            // Read template once
+            const templateBytes = await fs.promises.readFile(session.pdfPath);
+            const templatePdf = await PDFDocument.load(templateBytes, { 
+                password: pdfPassword,
+                ignoreEncryption: !pdfPassword 
+            });
+            const templatePageIndices = templatePdf.getPageIndices();
+
+            // Embed fonts once
+            const helveticaFont = await mergedPdf.embedFont(StandardFonts.Helvetica);
+            const helveticaBold = await mergedPdf.embedFont(StandardFonts.HelveticaBold);
+
+            for (const instance of instances) {
+                const copiedPages = await mergedPdf.copyPages(templatePdf, templatePageIndices);
+                copiedPages.forEach(page => mergedPdf.addPage(page));
+                await fillPdfPages(mergedPdf, copiedPages, instance.fields, helveticaFont, helveticaBold);
+            }
+
+            // Flatten if requested (removes form interactivity)
+            if (flatten) {
+                try {
+                    const form = mergedPdf.getForm();
+                    form.flatten();
+                } catch (e) {
+                    // No form to flatten
+                }
+            }
+
+            pdfBuffer = Buffer.from(await mergedPdf.save());
+        } else {
+            // Single instance - use fields directly
+            const fieldsToUse = fields || (instances && instances[0]?.fields) || session.fields;
+            pdfBuffer = await generateFilledPDF(session.pdfPath, fieldsToUse, flatten, pdfPassword);
+        }
+
+        // Encrypt PDF with auto-generated password
+        console.log(`[Generate] Encrypting PDF with auto-generated password for session: ${sessionId}`);
+        pdfBuffer = encryptPdfBuffer(pdfBuffer, password);
+
+        const filledPath = await saveGeneratedPDF(sessionId, pdfBuffer);
+
+        session.filledPath = filledPath;
+        session.password = password;
+        sessions.set(sessionId, session);
+
+        // --- Auto-Email Feature ---
+        let emailSent = false;
+        const sessionCookie = req.cookies && req.cookies.session ? req.cookies.session : '';
+        const authHeader = req.headers.authorization || '';
+        let idToken = '';
+
+        if (authHeader.startsWith('Bearer ')) {
+            idToken = authHeader.split('Bearer ')[1];
+        }
+
+        if (sessionCookie || idToken) {
+            try {
+                const admin = require('firebase-admin');
+                let decodedClaims;
+
+                if (sessionCookie) {
+                    decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+                } else {
+                    decodedClaims = await admin.auth().verifyIdToken(idToken, true);
+                }
+
+                // Get the user's email either from claims or by fetching the user record
+                let userEmail = decodedClaims.email;
+                if (!userEmail && decodedClaims.uid) {
+                    const userRecord = await admin.auth().getUser(decodedClaims.uid);
+                    userEmail = userRecord.email;
+                }
+
+                if (userEmail) {
+                    console.log(`[Generate] Triggering background auto-email to: ${userEmail}`);
+                    const { sendPdfEmail } = require('../services/emailService');
+                    // Send email in background to avoid blocking the response
+                    sendPdfEmail(userEmail, filledPath, 'filled-form.pdf', session.password || null)
+                        .then(() => console.log(`[Generate] Background email sent to ${userEmail}`))
+                        .catch(err => console.error(`[Generate] Background email failed for ${userEmail}:`, err.message));
+                    emailSent = true;
+                }
+            } catch (authErr) {
+                console.error('Auto-email error (verifying auth):', authErr);
+                // We swallow the error so the PDF download still succeeds even if email fails
+            }
+        }
+
+        res.json({ success: true, downloadReady: true, emailSent });
+    } catch (error) {
+        console.error('Generate error:', error);
+        res.status(500).json({ error: 'Failed to generate PDF', details: error.message, stack: error.stack });
+    }
+});
+
+/**
+ * Download filled PDF
+ * GET /api/download/:sessionId
+ */
+router.get('/download/:sessionId', async (req, res) => {
+    const { sessionId } = req.params;
+    const session = sessions.get(sessionId);
+
+    const filledPath = path.join(TEMP_DIR, `${sessionId}_filled.pdf`);
+
+    console.log(`[Download] Request for session: ${sessionId}, file-exists: ${fs.existsSync(filledPath)}, cookie: ${!!(req.cookies && req.cookies.session)}`);
+
+    if (!fs.existsSync(filledPath)) {
+        return res.status(404).json({ error: 'Filled PDF not found. Please generate first.' });
+    }
+
+    // Email is already sent during /api/generate — no need to send again here
+
+    res.download(filledPath, 'filled-form.pdf', (err) => {
+        if (!err) {
+            // Clean up after successful download
+            setTimeout(() => {
+                deleteSessionFiles(sessionId);
+                sessions.delete(sessionId);
+            }, 5000);
+        }
+    });
+});
+
+/**
+ * Email filled PDF
+ * POST /api/email/:sessionId
+ */
+router.post('/email/:sessionId', async (req, res) => {
+    const { sessionId } = req.params;
+    const { email } = req.body;
+    const session = sessions.get(sessionId);
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email address is required' });
+    }
+
+    const filledPath = path.join(TEMP_DIR, `${sessionId}_filled.pdf`);
+
+    if (!fs.existsSync(filledPath)) {
+        return res.status(404).json({ error: 'Filled PDF not found. Please generate first.' });
+    }
+
+    try {
+        const { sendPdfEmail } = require('../services/emailService');
+        await sendPdfEmail(email, filledPath, 'filled-form.pdf');
+
+        // Optionally clean up session after email
+        setTimeout(() => {
+            deleteSessionFiles(sessionId);
+            sessions.delete(sessionId);
+        }, 300000); // Wait 5 minutes before cleanup, or based on your needs
+
+        res.json({ success: true, message: 'Email sent successfully!' });
+    } catch (error) {
+        console.error('Email error:', error);
+        res.status(500).json({ error: 'Failed to send email. Ensure SMTP is configured correctly.' });
+    }
+});
+
+/**
+ * Get session info
+ * GET /api/session/:sessionId
+ */
+router.get('/session/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const session = sessions.get(sessionId);
+
+    if (!session) {
+        return res.status(404).json({ error: 'Session not found or expired' });
+    }
+
+    res.json({
+        exists: true,
+        pageCount: session.pdfData.pageCount,
+        pageInfo: session.pdfData.pageInfo,
+        fieldCount: session.fields.length
+    });
+});
+
+/**
+ * Contact Form Submission
+ * POST /api/contact
+ */
+router.post('/contact', upload.single('screenshot'), async (req, res) => {
+    const { name, email, message } = req.body;
+    const screenshot = req.file;
+
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Name, email, and message are required' });
+    }
+
+    try {
+        let attachment = null;
+        if (screenshot) {
+            const fileContent = await fs.promises.readFile(screenshot.path);
+            attachment = {
+                filename: screenshot.originalname,
+                content: fileContent.toString('base64')
+            };
+        }
+
+        await sendContactEmail(name, email, message, attachment);
+
+        // Clean up uploaded screenshot
+        if (screenshot) {
+            fs.promises.unlink(screenshot.path).catch(err => console.error('Error deleting screenshot:', err));
+        }
+
+        res.json({ success: true, message: 'Message sent successfully' });
+    } catch (error) {
+        console.error('Contact form error:', error);
+        res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+    }
+});
+
+module.exports = router;

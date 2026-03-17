@@ -1,0 +1,77 @@
+{
+  "templateName": "e59d9b5b-e620-419f-8432-df310ea0cfc2.pdf",
+  "userId": "aPiKKXFjWZN9WwxYvasYp195WKy2",
+  "savedAt": "2026-02-25T09:55:39.493Z",
+  "fields": [
+    {
+      "id": "suggested_0",
+      "name": "Full Name",
+      "type": "text",
+      "page": 1,
+      "x": 267,
+      "y": 323,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_1",
+      "name": "Date",
+      "type": "date",
+      "page": 1,
+      "x": 235,
+      "y": 542,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_2",
+      "name": "Email",
+      "type": "text",
+      "page": 1,
+      "x": 168,
+      "y": 507,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_3",
+      "name": "Phone",
+      "type": "text",
+      "page": 1,
+      "x": 173,
+      "y": 441,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_4",
+      "name": "Signature",
+      "type": "signature",
+      "page": 1,
+      "x": 150,
+      "y": 118.80000000000007,
+      "width": 250,
+      "height": 50,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    }
+  ]
+}

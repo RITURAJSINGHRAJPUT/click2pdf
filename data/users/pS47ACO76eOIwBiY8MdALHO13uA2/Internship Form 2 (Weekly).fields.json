@@ -1,0 +1,77 @@
+{
+  "templateName": "Internship Form 2 (Weekly).pdf",
+  "userId": "pS47ACO76eOIwBiY8MdALHO13uA2",
+  "savedAt": "2026-02-24T06:27:17.328Z",
+  "fields": [
+    {
+      "id": "suggested_0",
+      "name": "Full Name",
+      "type": "text",
+      "page": 1,
+      "x": 150,
+      "y": 716.125,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_1",
+      "name": "Date",
+      "type": "date",
+      "page": 1,
+      "x": 150,
+      "y": 657.15,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_2",
+      "name": "Email",
+      "type": "text",
+      "page": 1,
+      "x": 150,
+      "y": 598.175,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_3",
+      "name": "Phone",
+      "type": "text",
+      "page": 1,
+      "x": 150,
+      "y": 539.2,
+      "width": 200,
+      "height": 20,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    },
+    {
+      "id": "suggested_4",
+      "name": "Signature",
+      "type": "signature",
+      "page": 1,
+      "x": 150,
+      "y": 126.375,
+      "width": 250,
+      "height": 50,
+      "value": "",
+      "required": false,
+      "detected": false,
+      "suggested": true
+    }
+  ]
+}
