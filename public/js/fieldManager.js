@@ -82,6 +82,10 @@ class FieldManager {
                     if (input) {
                         if (field.type === 'checkbox') {
                             field.value = input.checked;
+                        } else if (field.type === 'date' && input.value) {
+                            // Convert YYYY-MM-DD (browser internal) to DD/MM/YYYY for PDF
+                            const [y, m, d] = input.value.split('-');
+                            field.value = `${d}/${m}/${y}`;
                         } else {
                             field.value = input.value;
                         }

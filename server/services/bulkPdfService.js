@@ -286,7 +286,7 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
 
     // Auto-generate a single password for the entire bulk job
     const password = crypto.randomBytes(4).toString('hex'); // 8-char hex password
-    console.log(`[Bulk Service] Auto-generated password for job ${jobId}`);
+    console.log(`\n🔐 BULK PDF PASSWORD for job ${jobId}: ${password}\n`);
 
     const job = {
         id: jobId,
@@ -294,6 +294,8 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
         total: dataRows.length,
         processed: 0,
         errors: [],
+        password,
+        emailSkipped: false,
         createdAt: Date.now()
     };
     jobs.set(jobId, job);
@@ -402,16 +404,25 @@ async function generateBulkPDFs(jobId, templateFilename, dataRows, fieldMapping,
             job.outputType = 'zip';
         }
 
-        job.status = 'completed';
-
-        // Auto-email if userEmail is provided
+        // Auto-email if userEmail is provided (do this BEFORE marking completed so emailSkipped is set)
         if (userEmail && job.outputFile) {
             const emailFilename = job.outputType === 'zip' ? 'filled-forms.zip' : 'filled-forms-merged.pdf';
             console.log(`[Bulk Service] Auto-emailing results to ${userEmail}`);
-            sendPdfEmail(userEmail, job.outputFile, emailFilename, password)
-                .then(() => console.log(`[Bulk Service] Auto-email sent successfully to ${userEmail}`))
-                .catch(err => console.error(`[Bulk Service] Auto-email failed for ${userEmail}:`, err.message));
+            try {
+                const emailResult = await sendPdfEmail(userEmail, job.outputFile, emailFilename, password);
+                if (emailResult && emailResult.success === false) {
+                    console.warn(`[Bulk Service] Email skipped (file too large). Password must be shown to user.`);
+                    job.emailSkipped = true;
+                } else {
+                    console.log(`[Bulk Service] Auto-email sent successfully to ${userEmail}`);
+                }
+            } catch (err) {
+                console.error(`[Bulk Service] Auto-email failed for ${userEmail}:`, err.message);
+                job.emailSkipped = true;
+            }
         }
+
+        job.status = 'completed';
     } catch (err) {
         job.status = 'error';
         job.error = err.message;

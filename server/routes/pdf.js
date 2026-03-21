@@ -117,6 +117,7 @@ router.post('/generate/:sessionId', express.json(), async (req, res) => {
     // Auto-generate a random password for PDF protection
     const crypto = require('crypto');
     const password = crypto.randomBytes(4).toString('hex'); // 8-char hex password
+    console.log(`\n🔐 PDF PASSWORD for session ${sessionId}: ${password}\n`);
 
     console.log(`[Generate] Request received for session: ${sessionId}, has-session: ${!!session}, cookie: ${!!(req.cookies && req.cookies.session)}`);
 

@@ -504,7 +504,9 @@ router.get('/status/:jobId', (req, res) => {
         processed: job.processed,
         errors: job.errors,
         outputType: job.outputType,
-        error: job.error
+        error: job.error,
+        password: job.status === 'completed' ? job.password : undefined,
+        emailSkipped: job.emailSkipped || false
     });
 });
 

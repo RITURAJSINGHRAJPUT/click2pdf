@@ -324,6 +324,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Handle back-forward cache (bfcache) restoration
+    // When user presses browser back from editor, the DOM is restored in its
+    // previous state (loading spinner visible, sections hidden). Reset the UI.
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            // Page was restored from bfcache — reset UI to normal state
+            uploadZone.classList.remove('hidden');
+            uploadLoading.classList.add('hidden');
+            const templatesSection = document.getElementById('templatesSection');
+            if (templatesSection) {
+                templatesSection.classList.remove('hidden');
+            }
+            // Reload templates to ensure fresh state
+            loadTemplates();
+        }
+    });
+
     /**
      * Show error message
      */

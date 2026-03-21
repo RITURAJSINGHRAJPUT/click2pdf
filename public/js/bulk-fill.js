@@ -622,7 +622,7 @@ async function pollJobStatus() {
             // Refresh credit count
             await fetchUserCredits();
 
-            showEmailSuccessPopup();
+            showEmailSuccessPopup(job.password, job.emailSkipped);
 
         } else if (job.status === 'error') {
             throw new Error(job.error || 'Generation failed');
@@ -686,38 +686,76 @@ function escapeHtml(text) {
 }
 
 /**
- * Show a 5-second success popup for email delivery
+ * Show a popup after bulk generation — shows password on screen if email was skipped (file too large)
  */
-function showEmailSuccessPopup() {
+function showEmailSuccessPopup(password, emailSkipped) {
     let popup = document.getElementById('emailSuccessPopup');
-    if (!popup) {
-        popup = document.createElement('div');
-        popup.id = 'emailSuccessPopup';
-        popup.className = 'fixed inset-0 z-[100] flex items-center justify-center pointer-events-none transition-opacity duration-300 opacity-0';
+    if (popup) popup.remove(); // Always recreate to show fresh content
+
+    popup = document.createElement('div');
+    popup.id = 'emailSuccessPopup';
+    popup.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/40 transition-opacity duration-300 opacity-0';
+
+    if (emailSkipped && password) {
+        // File was too large to email — show password directly on screen
         popup.innerHTML = `
-            <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full mx-4 border-4 border-vibrant-turquoise text-center transform scale-95 transition-transform duration-300 pointer-events-auto flex flex-col items-center">
+            <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full mx-4 border-4 border-amber-400 text-center transform scale-95 transition-transform duration-300 flex flex-col items-center">
+                <div class="w-16 h-16 bg-amber-50 rounded-[1.2rem] flex items-center justify-center mb-4">
+                    <span style="font-size:2.5rem;">⚠️</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-800 mb-2">File Too Large to Email</h3>
+                <p class="text-slate-500 text-sm mb-5">Your PDF was too large to send by email. Download it below and use this password to open your files:</p>
+                <div class="w-full bg-amber-50 border-2 border-amber-400 border-dashed rounded-2xl py-4 px-6 mb-4">
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-widest mb-1">🔐 Your PDF Password</p>
+                    <p id="bulkPdfPassword" class="text-3xl font-black tracking-[0.25em] text-amber-600 font-mono select-all">${password}</p>
+                    <p class="text-xs text-amber-500 mt-2">Tap the password to select &amp; copy</p>
+                </div>
+                <button id="copyPwdBtn" class="w-full py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-white font-black text-base transition-colors mb-3">Copy Password</button>
+                <button onclick="document.getElementById('emailSuccessPopup').remove();" class="w-full py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm transition-colors">Close</button>
+            </div>
+        `;
+    } else {
+        // Email sent successfully
+        popup.innerHTML = `
+            <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-sm w-full mx-4 border-4 border-vibrant-turquoise text-center transform scale-95 transition-transform duration-300 flex flex-col items-center">
                 <div class="w-20 h-20 bg-soft-turquoise rounded-[1.5rem] flex items-center justify-center mb-6 rotate-3">
                     <span class="material-symbols-outlined text-vibrant-turquoise text-5xl">mark_email_read</span>
                 </div>
                 <h3 class="text-2xl font-black text-slate-800 mb-2">Successfully Generated! 🎉</h3>
-                <p class="text-slate-600 font-bold mb-4 flex-1">Your secure documents have been delivered to your registered email address. You may also proceed with the local download below.</p>
+                <p class="text-slate-600 font-bold mb-4">Your secure documents have been delivered to your registered email. You may also download them below.</p>
                 <div class="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 w-full">
-                    <p class="text-sm font-bold text-slate-500">To open your files, please retrieve the <span class="text-vibrant-turquoise border-b-2 border-vibrant-turquoise">secure password</span> sent to your inbox.</p>
+                    <p class="text-sm font-bold text-slate-500">To open your files, retrieve the <span class="text-vibrant-turquoise border-b-2 border-vibrant-turquoise">secure password</span> from your inbox.</p>
                 </div>
+                <button onclick="document.getElementById('emailSuccessPopup').remove();" class="mt-4 w-full py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm transition-colors">Close</button>
             </div>
         `;
-        document.body.appendChild(popup);
     }
 
-    // Show it
-    popup.classList.remove('opacity-0');
-    popup.firstElementChild.classList.remove('scale-95');
-    popup.firstElementChild.classList.add('scale-100');
+    document.body.appendChild(popup);
 
-    // Hide after 5 seconds
-    setTimeout(() => {
-        popup.classList.add('opacity-0');
-        popup.firstElementChild.classList.remove('scale-100');
-        popup.firstElementChild.classList.add('scale-95');
-    }, 5000);
+    // Animate in
+    requestAnimationFrame(() => {
+        popup.classList.remove('opacity-0');
+        const inner = popup.querySelector('div');
+        inner.classList.remove('scale-95');
+        inner.classList.add('scale-100');
+    });
+
+    // Wire up copy button if present
+    const copyBtn = document.getElementById('copyPwdBtn');
+    if (copyBtn && password) {
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(password).then(() => {
+                copyBtn.textContent = '✅ Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy Password'; }, 1500);
+            });
+        });
+    }
+
+    // Only auto-close the success popup; password popup stays until manually dismissed
+    if (!emailSkipped) {
+        setTimeout(() => {
+            popup.classList.add('opacity-0');
+        }, 5000);
+    }
 }
