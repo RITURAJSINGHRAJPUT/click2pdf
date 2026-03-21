@@ -323,24 +323,31 @@ function formatTime(timeStr) {
  * Draw checkbox
  */
 function drawCheckbox(page, field, x, y) {
+    console.log(`drawCheckbox called for field ${field.name}, value: ${field.value}, type: ${typeof field.value}`);
     if (field.value === true || field.value === 'true' || field.value === 'checked') {
         const size = Math.min(field.width, field.height);
         const padding = size * 0.2;
+        console.log(`drawCheckbox drawing checkmark! size=${size}, padding=${padding}, x=${x}, y=${y}`);
 
-        // Draw checkmark
-        page.drawLine({
-            start: { x: x + padding, y: y + size / 2 },
-            end: { x: x + size / 2, y: y + padding },
-            thickness: 2,
-            color: rgb(0, 0, 0)
-        });
+        try {
+            // Draw a thick X mark
+            page.drawLine({
+                start: { x: x + padding, y: y + padding },
+                end: { x: x + size - padding, y: y + size - padding },
+                thickness: 3,
+                color: rgb(0, 0, 0)
+            });
 
-        page.drawLine({
-            start: { x: x + size / 2, y: y + padding },
-            end: { x: x + size - padding, y: y + size - padding },
-            thickness: 2,
-            color: rgb(0, 0, 0)
-        });
+            page.drawLine({
+                start: { x: x + padding, y: y + size - padding },
+                end: { x: x + size - padding, y: y + padding },
+                thickness: 3,
+                color: rgb(0, 0, 0)
+            });
+            console.log(`drawCheckbox success!`);
+        } catch (e) {
+            console.error(`drawCheckbox ERROR:`, e);
+        }
     }
 }
 

@@ -1,0 +1,6 @@
+Student Name,Organization,Address,Day 1 (Present),Day 2 (Present),Day 3 (Present),Day 4 (Present),Day 5 (Present)
+John Doe,Tech Innovations Inc,123 Tech Park,yes,yes,no,yes,yes
+Jane Smith,Global Solutions,456 Business Rd,1,1,1,0,1
+Alice Johnson,Acme Corp,789 Corporate Blvd,true,true,false,true,false
+Bob Williams,StartUp Hub,101 Innovation Ave,x,x,x,x,x
+Eve Davis,Data Systems LLC,202 Server Lane,checked,checked,,checked,checked

@@ -259,6 +259,18 @@ class FieldManager {
                 input = document.createElement('input');
                 input.type = 'checkbox';
                 input.checked = field.value === true || field.value === 'true';
+                
+                // Allow clicking anywhere in the wrapper to toggle the checkbox
+                wrapper.addEventListener('click', (e) => {
+                    // Prevent toggling if the user was just dragging
+                    if (!(this.dragState && this.dragState.isDragging)) {
+                        // If they clicked the wrapper NOT the input directly, toggle input ourselves
+                        if (e.target !== input) {
+                            input.checked = !input.checked;
+                            this.updateFieldValue(field.id, input);
+                        }
+                    }
+                });
                 break;
 
             case 'dropdown':

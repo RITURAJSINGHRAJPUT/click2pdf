@@ -619,6 +619,9 @@ async function pollJobStatus() {
             downloadBtn.classList.remove('hidden');
             generateBtn.disabled = false;
 
+            // Auto-download the generated file
+            downloadResults();
+
             // Refresh credit count
             await fetchUserCredits();
 
