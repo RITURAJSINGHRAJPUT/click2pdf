@@ -1,0 +1,116 @@
+﻿d4dc192 pdf auto download checkbox issue solved
+A	data/users/EIMMrs928iQ38RrZRBrTA4dfalP2/Internship_Form_2_Weekly.fields.json
+A	data/users/EIMMrs928iQ38RrZRBrTA4dfalP2/Internship_Form_2_Weekly.pdf
+A	data/users/EIMMrs928iQ38RrZRBrTA4dfalP2/Internship_Form_3_Monthly.fields.json
+A	data/users/EIMMrs928iQ38RrZRBrTA4dfalP2/Internship_Form_3_Monthly.pdf
+M	pdf-format/Internship Form 2 (Weekly).fields.json
+M	pdf-format/Internship Form 3 (Monthly).fields.json
+M	public/css/styles.css
+M	public/js/bulk-fill.js
+M	public/js/fieldManager.js
+A	sample_monthly_internship_with_checkboxes.csv
+M	server/services/pdfGenerator.js
+cdbdd5f large file issue solved + password popup
+A	data/users/EIMMrs928iQ38RrZRBrTA4dfalP2/Internship_Form_1_Daily.fields.json
+A	data/users/EIMMrs928iQ38RrZRBrTA4dfalP2/Internship_Form_1_Daily.pdf
+M	public/Buy-Credits.html
+M	public/editor.html
+M	public/index.html
+M	public/js/app.js
+M	public/js/bulk-fill.js
+M	public/js/fieldManager.js
+M	server/routes/bulkFill.js
+M	server/routes/pdf.js
+M	server/services/bulkPdfService.js
+d7e6de2 1
+A	.gitignore
+A	README.md
+A	daily_bulk_template.csv
+A	data/.gitkeep
+A	data/users/.gitkeep
+A	data/users/aPiKKXFjWZN9WwxYvasYp195WKy2/e59d9b5b-e620-419f-8432-df310ea0cfc2.fields.json
+A	data/users/eT7fphhz9kNRRjTVJLMzVdrl4fN2/Internship Form 1 (Daily).fields.json
+A	data/users/eT7fphhz9kNRRjTVJLMzVdrl4fN2/Internship Form 2 (Weekly).fields.json
+A	data/users/pS47ACO76eOIwBiY8MdALHO13uA2/Internship Form 1 (Daily).fields.json
+A	data/users/pS47ACO76eOIwBiY8MdALHO13uA2/Internship Form 2 (Weekly).fields.json
+A	data/users/vfhTB2kTh0QhgW3m4VYp04bHkjm1/Internship Form 1 (Daily).fields.json
+A	firestore.rules
+A	package-lock.json
+A	package.json
+A	pdf-format/Internship Form 1 (Daily).fields.json
+A	pdf-format/Internship Form 1 (Daily).pdf
+A	pdf-format/Internship Form 2 (Weekly).fields.json
+A	pdf-format/Internship Form 2 (Weekly).pdf
+A	pdf-format/Internship Form 3 (Monthly).fields.json
+A	pdf-format/Internship Form 3 (Monthly).pdf
+A	pdf-format/Internship Form 4 (Final).fields.json
+A	pdf-format/Internship Form 4 (Final).pdf
+A	pdf-format/signature.png
+A	public/Buy-Credits.html
+A	public/app.html
+A	public/assets/banner.png
+A	public/assets/favicon_io/android-chrome-192x192.png
+A	public/assets/favicon_io/android-chrome-512x512.png
+A	public/assets/favicon_io/apple-touch-icon.png
+A	public/assets/favicon_io/favicon-16x16.png
+A	public/assets/favicon_io/favicon-32x32.png
+A	public/assets/favicon_io/favicon.ico
+A	public/assets/favicon_io/logo.png
+A	public/assets/favicon_io/logo2.png
+A	public/assets/favicon_io/site.webmanifest
+A	public/assets/qr.jpeg
+A	public/bulk-fill.html
+A	public/contact.html
+A	public/css/admin.css
+A	public/css/styles.css
+A	public/disclaimer.html
+A	public/editor.html
+A	public/help.html
+A	public/icons/icon-192.png
+A	public/icons/icon-192.svg
+A	public/icons/icon-512.png
+A	public/icons/icon-512.svg
+A	public/index.html
+A	public/js/Firebase-config.js
+A	public/js/admin.js
+A	public/js/app.js
+A	public/js/auth.js
+A	public/js/bulk-fill.js
+A	public/js/components.js
+A	public/js/editor.js
+A	public/js/fieldManager.js
+A	public/js/pdfViewer.js
+A	public/js/profile.js
+A	public/login.html
+A	public/manifest.json
+A	public/master/admin-dashboard.html
+A	public/master/bulkfill_credits.html
+A	public/master/templates.html
+A	public/master/user_management.html
+A	public/master/verify_payments.html
+A	public/offline.html
+A	public/privacy-policy.html
+A	public/profile.html
+A	public/refund-policy.html
+A	public/return-policy.html
+A	public/robots.txt
+A	public/sitemap.xml
+A	public/sw.js
+A	render.yaml
+A	server/config/firebase.js
+A	server/index.js
+A	server/middleware/adminAuth.js
+A	server/middleware/auth.js
+A	server/middleware/sessionAuth.js
+A	server/middleware/upload.js
+A	server/routes/admin.js
+A	server/routes/bulkFill.js
+A	server/routes/payments.js
+A	server/routes/pdf.js
+A	server/routes/session.js
+A	server/routes/templates.js
+A	server/services/bulkPdfService.js
+A	server/services/emailService.js
+A	server/services/pdfGenerator.js
+A	server/services/pdfParser.js
+A	server/utils/cleanup.js

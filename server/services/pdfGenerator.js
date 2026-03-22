@@ -330,17 +330,17 @@ function drawCheckbox(page, field, x, y) {
         console.log(`drawCheckbox drawing checkmark! size=${size}, padding=${padding}, x=${x}, y=${y}`);
 
         try {
-            // Draw a thick X mark
+            // Draw a checkmark (tick) instead of an X
             page.drawLine({
-                start: { x: x + padding, y: y + padding },
-                end: { x: x + size - padding, y: y + size - padding },
+                start: { x: x + padding, y: y + size * 0.5 },
+                end: { x: x + size * 0.45, y: y + padding * 1.5 },
                 thickness: 3,
                 color: rgb(0, 0, 0)
             });
 
             page.drawLine({
-                start: { x: x + padding, y: y + size - padding },
-                end: { x: x + size - padding, y: y + padding },
+                start: { x: x + size * 0.45, y: y + padding * 1.5 },
+                end: { x: x + size - padding, y: y + size - padding },
                 thickness: 3,
                 color: rgb(0, 0, 0)
             });

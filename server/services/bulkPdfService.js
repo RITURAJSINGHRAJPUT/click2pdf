@@ -238,6 +238,10 @@ function applyDataToFields(templateFields, dataRow, fieldMapping) {
                 // Skip empty values - keep template default (important for signature)
                 if (value === '' || value === null) {
                     console.log(`  Skipping empty value for ${field.name}`);
+                    if (field.type === 'checkbox') {
+                        field.value = false;
+                        matchedCount++;
+                    }
                     continue;
                 }
 
